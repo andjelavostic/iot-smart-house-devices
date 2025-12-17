@@ -1,0 +1,26 @@
+{
+    "DS1": {
+        "type":"sensor",
+        "simulated": true
+    } ,
+    "DL":{
+        "type":"actuator",
+        "simulated":true
+    },
+    "DUS1": {
+        "type":"sensor",
+        "simulated": true
+    } ,
+    "DB":{
+        "type":"actuator",
+        "simulated":true
+    },
+    "DPIR1": {
+        "type":"sensor",
+        "simulated": true
+    } ,
+    "DMS":{
+        "type":"sensor",
+        "simulated":true
+    }
+}
