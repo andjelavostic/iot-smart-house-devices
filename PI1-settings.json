@@ -18,6 +18,13 @@
     "delay": 3,
     "field_name": "motion",
     "description": "Door Motion Sensor"
+    },
+    "DMS": {
+    "type": "membrane",
+    "simulated": true,
+    "delay": 3,
+    "field_name": "code",
+    "description": "Door Membrane Switch"
     }
   }
 }

@@ -34,21 +34,28 @@ def main():
             print(f"[WARN] No runner for {sensor_cfg['type']}")
             continue
 
-        t = threading.Thread(
-            target=runner,
-            kwargs={
+        if sensor_cfg["type"] in ["button", "pir"]:
+            kwargs = {
                 "sensor_code": sensor_code,
                 "delay": sensor_cfg.get("delay", 1),
                 "on_state_change": lambda c, s, v: default_on_event(
-                    c,
-                    sensor_cfg["field_name"],
-                    v
+                    c, sensor_cfg["field_name"], v
                 ),
                 "stop_event": stop_event,
                 "settings": sensor_cfg
-            },
-            daemon=True
-        )
+            }
+        else:  # membrane
+            kwargs = {
+                "sensor_code": sensor_code,
+                "delay": sensor_cfg.get("delay", 1),
+                "on_value": lambda c, s, v: default_on_event(
+                    c, sensor_cfg["field_name"], v
+                ),
+                "stop_event": stop_event,
+                "settings": sensor_cfg
+            }
+
+        t = threading.Thread(target=runner, kwargs=kwargs, daemon=True)
         t.start()
         threads.append(t)
 
