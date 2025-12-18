@@ -9,5 +9,6 @@ def keyboard_sim(sensor_code, delay, on_value, stop_event, settings=None):
 
         if key.lower() == "b":
             on_value(sensor_code, settings, "b")
-
+        if key.lower() == "l":
+            on_value(sensor_code, settings, "l")
         time.sleep(delay)

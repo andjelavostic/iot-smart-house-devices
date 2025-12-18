@@ -32,6 +32,10 @@ def main():
             buzzer = actuators.get("DB")
             if buzzer:
                 buzzer["state"] = not buzzer["state"]
+        if device_code == "KB1" and value == "l":
+            led = actuators.get("DL")
+            if led:
+                led["state"] = not led["state"]
 
     for sensor_code, sensor_cfg in sensors.items():
 
@@ -76,7 +80,6 @@ def main():
         if act_cfg["type"] == "led":
             kwargs = {
                 "actuator_code": act_code,
-                "delay": act_cfg.get("delay", 0.5),
                 "stop_event": stop_event,
                 "settings": act_cfg,
                 "on_state_change": lambda c, s, v: print(

@@ -15,14 +15,26 @@ actuators = settings.get("actuators", {})
 def default_on_event(sensor_code, field, value):
     print(f"[EVENT] {sensor_code} | {field} = {value}")
     # primer: PIR pali LED
-    if sensor_code == "DPIR1":
-        actuators["DL"]["state"] = value
+    #if sensor_code == "DPIR1":
+    #    actuators["DL"]["state"] = value
+def on_event(device_code, field, value):
+    print(f"[EVENT] {device_code} | {field} = {value}")
 
+    if device_code == "KB1" and value == "b":
+        buzzer = actuators.get("DB")
+        if buzzer:
+            buzzer["state"] = not buzzer["state"]
+    if device_code == "KB1" and value == "l":
+        led = actuators.get("DL")
+        if led:
+            led["state"] = not led["state"]
 def main():
     print("Starting app")
 
     threads = []
     stop_event = threading.Event()
+    for act in actuators.values():
+            act["state"] = False
 
     print(f"Mode: {settings['mode']} | Runs on: {settings['runs_on']}")
 
@@ -33,38 +45,30 @@ def main():
 
         runner = SENSOR_REGISTRY.get(sensor_cfg["type"])
         if not runner:
-            print(f"[WARN] No runner for {sensor_cfg['type']}")
+            print(f"[WARN] No sensor runner for {sensor_cfg['type']}")
             continue
-<<<<<<< HEAD
 
-        if sensor_cfg["type"] in ["button", "pir", "buzzer"]:
-=======
-        if sensor_cfg["type"] in ["button", "pir"]:
->>>>>>> a79837576cf537ac37cc659169e235299936854a
-            kwargs = {
-                "sensor_code": sensor_code,
-                "delay": sensor_cfg.get("delay", 1),
-                "on_state_change": lambda c, s, v: default_on_event(
-                    c, sensor_cfg["field_name"], v
-                ),
-                "stop_event": stop_event,
-                "settings": sensor_cfg
-            }
-        elif sensor_cfg["type"] in ["membrane","ultrasonic"]:  # membrane i ulstrasonic sensori
-            kwargs = {
-                "sensor_code": sensor_code,
-                "delay": sensor_cfg.get("delay", 1),
-                "on_value": lambda c, s, v: default_on_event(
-                    c, sensor_cfg["field_name"], v
-                ),
-                "stop_event": stop_event,
-                "settings": sensor_cfg
-            }
+        kwargs = {
+            "sensor_code": sensor_code,
+            "delay": sensor_cfg.get("delay", 0.1),
+            "stop_event": stop_event,
+            "settings": sensor_cfg,
+        }
+
+        if sensor_cfg["type"] in ["keyboard", "membrane","ultrasonic"]:
+            kwargs["on_value"] = lambda c, s, v: on_event(
+                c, s.get("field_name", "value"), v
+            )
+        else:
+            kwargs["on_state_change"] = lambda c, s, v: on_event(
+                c, s.get("field_name", "active"), v
+            )
 
         t = threading.Thread(target=runner, kwargs=kwargs, daemon=True)
         t.start()
         threads.append(t)
     for act_code, act_cfg in actuators.items():
+
         if not act_cfg.get("simulated", False):
             continue
 
@@ -73,18 +77,24 @@ def main():
             print(f"[WARN] No actuator runner for {act_cfg['type']}")
             continue
 
-        # inicijalno stanje
-        act_cfg["state"] = False
-
-        kwargs = {
-            "actuator_code": act_code,
-            "delay": act_cfg.get("delay", 0.1),
-            "stop_event": stop_event,
-            "settings": act_cfg,
-            "on_state_change": lambda c, s, v: default_on_event(
-                c, act_cfg.get("field_name", "state"), v
-            ),
-        }
+        if act_cfg["type"] == "led":
+            kwargs = {
+                "actuator_code": act_code,
+                "stop_event": stop_event,
+                "settings": act_cfg,
+                "on_state_change": lambda c, s, v: print(
+                    f"[ACTUATOR] {c} = {v}"
+                ),
+            }
+        elif act_cfg["type"] == "buzzer":
+            kwargs = {
+                "actuator_code": act_code,
+                "stop_event": stop_event,
+                "settings": act_cfg,
+                "on_state_change": lambda c, s, v: print(
+                    f"[ACTUATOR] {c} = {v}"
+                ),
+            }
 
         t = threading.Thread(target=runner, kwargs=kwargs, daemon=True)
         t.start()
@@ -102,6 +112,5 @@ def main():
             t.join(timeout=2)
 
         print("System stopped cleanly.")
-
 if __name__ == "__main__":
     main()
