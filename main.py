@@ -14,10 +14,6 @@ actuators = settings.get("actuators", {})
 
 def default_on_event(sensor_code, field, value):
     print(f"[EVENT] {sensor_code} | {field} = {value}")
-    # primer: dugme DS1 pali LED
-    if sensor_code == "DS1":
-        actuators["DL"]["state"] = value  # value = True/False
-
     # primer: PIR pali LED
     if sensor_code == "DPIR1":
         actuators["DL"]["state"] = value
