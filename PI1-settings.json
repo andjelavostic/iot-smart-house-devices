@@ -20,11 +20,22 @@
     "description": "Door Motion Sensor"
     },
     "DMS": {
-    "type": "membrane",
-    "simulated": true,
-    "delay": 3,
-    "field_name": "code",
-    "description": "Door Membrane Switch"
+      "name":"DMS",
+      "type": "membrane",
+      "simulated": true,
+      "delay": 3,
+      "field_name": "code",
+      "description": "Door Membrane Switch"
     }
-  }
+  },
+   "actuators": {
+    "DL": {
+      "name": "DL",
+      "type": "led",
+      "simulated": true,
+      "delay": 0,
+      "field_name": "state",
+      "description": "Door Light (LED diode)"
+    }
+   }
 }
