@@ -10,6 +10,14 @@
       "delay": 2,
       "field_name": "status",
       "description": "Door Sensor (Button)"
+    },
+    "DPIR1": {
+    "name": "DPIR1",
+    "type": "pir",
+    "simulated": true,
+    "delay": 3,
+    "field_name": "motion",
+    "description": "Door Motion Sensor"
     }
   }
 }
