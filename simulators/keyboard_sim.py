@@ -3,7 +3,7 @@ import sys
 
 def keyboard_sim(sensor_code, delay, on_value, stop_event, settings=None):
     print("Press 'b' to toggle buzzer ON/OFF")
-
+    print("Press 'l' to toggle LED ON/OFF")
     while not stop_event.is_set():
         key = sys.stdin.read(1)
 

@@ -33,11 +33,10 @@ def main():
 
     threads = []
     stop_event = threading.Event()
-    for act in actuators.values():
-            act["state"] = False
 
     print(f"Mode: {settings['mode']} | Runs on: {settings['runs_on']}")
-
+    for act in actuators.values():
+                act["state"] = False
     for sensor_code, sensor_cfg in sensors.items():
 
         if not sensor_cfg.get("simulated", False):
