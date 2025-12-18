@@ -41,7 +41,7 @@
       "name": "DL",
       "type": "led",
       "simulated": true,
-      "delay": 0,
+      "delay": 1,
       "field_name": "state",
       "description": "Door Light (LED diode)"
     }

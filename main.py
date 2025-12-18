@@ -34,7 +34,6 @@ def main():
         if not runner:
             print(f"[WARN] No runner for {sensor_cfg['type']}")
             continue
-
         if sensor_cfg["type"] in ["button", "pir"]:
             kwargs = {
                 "sensor_code": sensor_code,
@@ -45,7 +44,7 @@ def main():
                 "stop_event": stop_event,
                 "settings": sensor_cfg
             }
-        else:  # membrane
+        elif sensor_cfg["type"] in ["membrane","ultrasonic"]:  # membrane i ulstrasonic sensori
             kwargs = {
                 "sensor_code": sensor_code,
                 "delay": sensor_cfg.get("delay", 1),
