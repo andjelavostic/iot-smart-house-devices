@@ -32,6 +32,14 @@
         "simulated": true,
         "field_name": "key",
         "delay": 0.1
+    },
+    "DUS1": {
+      "name": "DUS1",
+      "type": "ultrasonic",
+      "simulated": true,
+      "delay": 2,
+      "field_name": "distance",
+      "description": "Door Ultrasonic Sensor"
     }
   },
    "actuators": {
