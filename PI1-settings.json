@@ -26,6 +26,14 @@
       "delay": 3,
       "field_name": "code",
       "description": "Door Membrane Switch"
+    },
+    "DUS1": {
+      "name": "DUS1",
+      "type": "ultrasonic",
+      "simulated": true,
+      "delay": 2,
+      "field_name": "distance",
+      "description": "Door Ultrasonic Sensor"
     }
   },
    "actuators": {
@@ -33,7 +41,7 @@
       "name": "DL",
       "type": "led",
       "simulated": true,
-      "delay": 1,
+      "delay": 0,
       "field_name": "state",
       "description": "Door Light (LED diode)"
     }
