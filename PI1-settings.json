@@ -26,6 +26,12 @@
       "delay": 3,
       "field_name": "code",
       "description": "Door Membrane Switch"
+    },
+    "KB1": {
+        "type": "keyboard",
+        "simulated": true,
+        "field_name": "key",
+        "delay": 0.1
     }
   },
    "actuators": {
@@ -36,6 +42,13 @@
       "delay": 1,
       "field_name": "state",
       "description": "Door Light (LED diode)"
+    },
+    "DB": {
+        "type": "buzzer",
+        "simulated": true,
+        "delay": 1,
+        "field_name": "active",
+        "description": "Door buzzer"
     }
    }
 }
