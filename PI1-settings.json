@@ -1,0 +1,15 @@
+{
+  "mode": "SIMULATION",
+  "runs_on": "PI1",
+
+  "sensors": {
+    "DS1": {
+      "name": "DS1",
+      "type": "button",
+      "simulated": true,
+      "delay": 2,
+      "field_name": "status",
+      "description": "Door Sensor (Button)"
+    }
+  }
+}
