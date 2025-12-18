@@ -1,7 +1,7 @@
 import threading
 import time
 from settings import load_settings
-from registry import SENSOR_REGISTRY
+from registry import ACTUATOR_REGISTRY, SENSOR_REGISTRY
 
 try:
     import RPi.GPIO as GPIO
@@ -23,6 +23,7 @@ def main():
     print(f"Mode: {settings['mode']} | Runs on: {settings['runs_on']}")
 
     sensors = settings.get("sensors", {})
+    actuators = settings.get("actuators", {})
 
     for sensor_code, sensor_cfg in sensors.items():
 
@@ -58,7 +59,32 @@ def main():
         t = threading.Thread(target=runner, kwargs=kwargs, daemon=True)
         t.start()
         threads.append(t)
+    for act_code, act_cfg in actuators.items():
 
+        if not act_cfg.get("simulated", False):
+            continue
+
+        runner = ACTUATOR_REGISTRY.get(act_cfg["type"])
+        if not runner:
+            print(f"[WARN] No actuator runner for {act_cfg['type']}")
+            continue
+
+        # inicijalno stanje
+        act_cfg["state"] = False
+        if act_cfg["type"] in ["led"]:
+            kwargs = {
+                "actuator_code": act_code,
+                "delay": act_cfg.get("delay", 0.5),
+                "stop_event": stop_event,
+                "settings": act_cfg,
+                "on_state_change": lambda c, s, v: default_on_event(
+                    c, act_cfg["field_name"], v
+                ),
+            }
+
+        t = threading.Thread(target=runner, kwargs=kwargs, daemon=True)
+        t.start()
+        threads.append(t)
     try:
         print("System running. Press CTRL+C to stop.")
         while True:
