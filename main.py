@@ -8,22 +8,23 @@ try:
     GPIO.setmode(GPIO.BCM)
 except ImportError:
     GPIO = None
-
+settings = load_settings()
+sensors = settings.get("sensors", {})
+actuators = settings.get("actuators", {})
 
 def default_on_event(sensor_code, field, value):
     print(f"[EVENT] {sensor_code} | {field} = {value}")
+    # primer: PIR pali LED
+    if sensor_code == "DPIR1":
+        actuators["DL"]["state"] = value
 
 def main():
     print("Starting app")
 
-    settings = load_settings()
     threads = []
     stop_event = threading.Event()
 
     print(f"Mode: {settings['mode']} | Runs on: {settings['runs_on']}")
-
-    sensors = settings.get("sensors", {})
-    actuators = settings.get("actuators", {})
 
     for sensor_code, sensor_cfg in sensors.items():
 
@@ -64,7 +65,6 @@ def main():
         t.start()
         threads.append(t)
     for act_code, act_cfg in actuators.items():
-
         if not act_cfg.get("simulated", False):
             continue
 
@@ -75,16 +75,16 @@ def main():
 
         # inicijalno stanje
         act_cfg["state"] = False
-        if act_cfg["type"] in ["led"]:
-            kwargs = {
-                "actuator_code": act_code,
-                "delay": act_cfg.get("delay", 0.5),
-                "stop_event": stop_event,
-                "settings": act_cfg,
-                "on_state_change": lambda c, s, v: default_on_event(
-                    c, act_cfg["field_name"], v
-                ),
-            }
+
+        kwargs = {
+            "actuator_code": act_code,
+            "delay": act_cfg.get("delay", 0.1),
+            "stop_event": stop_event,
+            "settings": act_cfg,
+            "on_state_change": lambda c, s, v: default_on_event(
+                c, act_cfg.get("field_name", "state"), v
+            ),
+        }
 
         t = threading.Thread(target=runner, kwargs=kwargs, daemon=True)
         t.start()
