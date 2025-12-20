@@ -35,6 +35,15 @@ def main():
     stop_event = threading.Event()
 
     print(f"Mode: {settings['mode']} | Runs on: {settings['runs_on']}")
+
+    print(f"[CONFIG] Sensors loaded: {list(sensors.keys())}")
+    print(f"[CONFIG] Actuators loaded: {list(actuators.keys())}")
+
+    print("Controls:")
+    print("  l - toggle LED")
+    print("  b - toggle BUZZER")
+    print("-" * 30)
+
     for act in actuators.values():
                 act["state"] = False
     for sensor_code, sensor_cfg in sensors.items():
