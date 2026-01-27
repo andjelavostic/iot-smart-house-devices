@@ -1,6 +1,13 @@
 {
   "mode": "SIMULATION",
   "runs_on": "PI1",
+  "device_hostname": "RPi_Station_1",
+  "mqtt": {
+    "broker": "localhost",
+    "port": 1883,
+    "batch_size": 5,
+    "publish_interval": 5
+  },
 
   "sensors": {
     "DS1": {
@@ -9,15 +16,17 @@
       "simulated": true,
       "delay": 2,
       "field_name": "status",
+      "topic": "home/ds1",
       "description": "Door Sensor (Button)"
     },
     "DPIR1": {
-    "name": "DPIR1",
-    "type": "pir",
-    "simulated": true,
-    "delay": 3,
-    "field_name": "motion",
-    "description": "Door Motion Sensor"
+      "name": "DPIR1",
+      "type": "pir",
+      "simulated": true,
+      "delay": 3,
+      "field_name": "motion",
+      "topic": "home/dpir1",
+      "description": "Door Motion Sensor"
     },
     "DMS": {
       "name":"DMS",
@@ -25,12 +34,14 @@
       "simulated": true,
       "delay": 3,
       "field_name": "code",
+      "topic": "home/dms",
       "description": "Door Membrane Switch"
     },
     "KB1": {
         "type": "keyboard",
         "simulated": true,
         "field_name": "key",
+        "topic": "home/kb1",
         "delay": 0.1
     },
     "DUS1": {
@@ -39,6 +50,7 @@
       "simulated": true,
       "delay": 2,
       "field_name": "distance",
+      "topic": "home/dus1",
       "description": "Door Ultrasonic Sensor"
     }
   },
@@ -49,6 +61,7 @@
       "simulated": true,
       "delay": 1,
       "field_name": "state",
+      "topic": "home/dl",
       "description": "Door Light (LED diode)"
     },
     "DB": {
@@ -56,6 +69,7 @@
         "simulated": true,
         "delay": 1,
         "field_name": "active",
+        "topic": "home/db",
         "description": "Door buzzer"
     }
    }
