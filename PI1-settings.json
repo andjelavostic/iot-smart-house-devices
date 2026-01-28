@@ -35,6 +35,8 @@
       "type": "membrane",
       "simulated": true,
       "delay": 3,
+      "rows": [18, 23, 24, 25],
+      "cols": [4, 17, 27, 22],
       "field_name": "code",
       "topic": "home/dms",
       "description": "Door Membrane Switch"

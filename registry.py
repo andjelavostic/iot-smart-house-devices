@@ -10,6 +10,10 @@ try:
 except ImportError:
     run_pir_real = None
 from simulators.membrane_switch_sim import ms_sim
+try:
+    from sensors.membrane_switch import run_membrane_real
+except ImportError:
+    run_membrane_real = None
 from simulators.buzzer_sim import buzzer_sim
 from simulators.keyboard_sim import keyboard_sim
 from simulators.ultrasonic_sim import ultrasonic_sim
@@ -24,7 +28,10 @@ SENSOR_REGISTRY = {
         "true": run_pir_real,
         "sim": pir_sim
     },
-    "membrane": ms_sim,
+    "membrane": { 
+        "true": run_membrane_real, 
+        "sim": ms_sim 
+    },
     "keyboard": keyboard_sim,
     "ultrasonic":ultrasonic_sim
 }
