@@ -15,6 +15,10 @@ try:
 except ImportError:
     run_membrane_real = None
 from simulators.buzzer_sim import buzzer_sim
+try:
+    from sensors.buzzer import run_buzzer_real
+except ImportError:
+    run_buzzer_real = None
 from simulators.keyboard_sim import keyboard_sim
 from simulators.ultrasonic_sim import ultrasonic_sim
 
@@ -37,5 +41,8 @@ SENSOR_REGISTRY = {
 }
 ACTUATOR_REGISTRY = {
     "led": led_sim,
-    "buzzer": buzzer_sim
+    "buzzer": {
+        "true": run_buzzer_real,
+        "sim": buzzer_sim
+    }
 }

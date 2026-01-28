@@ -72,6 +72,7 @@
         "type": "buzzer",
         "simulated": true,
         "delay": 1,
+        "pin": 19,
         "field_name": "active",
         "topic": "home/db",
         "description": "Door buzzer"
