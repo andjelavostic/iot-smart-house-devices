@@ -133,11 +133,19 @@ def main():
 
     # Pokretanje aktuatora
     for act_code, act_cfg in actuators.items():
-        if not act_cfg.get("simulated", False):
+        entry = ACTUATOR_REGISTRY.get(act_cfg["type"])
+        if not entry:
             continue
 
-        runner = ACTUATOR_REGISTRY.get(act_cfg["type"])
+        is_simulated = act_cfg.get("simulated", False)
+        
+        if isinstance(entry, dict):
+            runner = entry["sim"] if is_simulated else entry["true"]
+        else:
+            runner = entry if is_simulated else None
+
         if not runner:
+            print(f"Error: Nije pronađen runner za {act_code}")
             continue
 
         kwargs = {
