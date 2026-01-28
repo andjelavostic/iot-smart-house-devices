@@ -25,6 +25,7 @@
       "type": "pir",
       "simulated": true,
       "delay": 3,
+      "pin": 18,
       "field_name": "motion",
       "topic": "home/dpir1",
       "description": "Door Motion Sensor"
