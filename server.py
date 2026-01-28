@@ -24,15 +24,18 @@ def on_message(client, userdata, msg):
     try:
         data = json.loads(msg.payload.decode('utf-8'))
         
+        # InfluxDB modelovanje sa tagovima za uređaj i simulaciju
         point = Point(data["measurement"]) \
             .tag("device", data["device"]) \
+            .tag("pi", data["pi"]) \
+            .tag("simulated", str(data["simulated"])) \
             .field(data["field"], data["value"]) 
 
         write_api.write(bucket=bucket, org=org, record=point)
-        print(f"Upisano: {data['device']} -> {data['field']}: {data['value']}")
+        print(f"Upisano u InfluxDB: {data['device']} sa {data['pi']}")
         
     except Exception as e:
-        print(f"Greška pri upisu: {e}")
+        print(f"Greška: {e}")
 
 mqtt_client = mqtt.Client()
 mqtt_client.on_connect = on_connect
