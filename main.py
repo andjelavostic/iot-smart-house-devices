@@ -89,14 +89,24 @@ def main():
 
     # Pokretanje senzora
     for sensor_code, sensor_cfg in sensors.items():
-        if not sensor_cfg.get("simulated", False):
+        # uzmemo unos iz registra za tip senzora (npr. 'button')
+        entry = SENSOR_REGISTRY.get(sensor_cfg["type"])
+        if not entry:
             continue
-        runner = SENSOR_REGISTRY.get(sensor_cfg["type"])
+
+        # provjera da li je u pitanju simulator ili pravi senzor
+        is_simulated = sensor_cfg.get("simulated", False)
+        
+        if isinstance(entry, dict):
+            runner = entry["sim"] if is_simulated else entry["true"]
+        else:
+            runner = entry if is_simulated else None
+
         if not runner:
+            print(f"Error: Nije pronađen runner za {sensor_code} (Simulated: {is_simulated})")
             continue
 
         topic = sensor_cfg.get("topic", f"home/{sensor_code}")
-        sim = sensor_cfg.get("simulated", True)
 
         kwargs = {
             "sensor_code": sensor_code,
@@ -105,14 +115,14 @@ def main():
             "settings": sensor_cfg,
         }
 
-        # Prosleđujemo 'sim' i 'topic' u callback
+        # Prosleđujemo 'is_simulated' i 'topic' u callback
         if sensor_cfg["type"] in ["keyboard", "membrane", "ultrasonic"]:
-            kwargs["on_value"] = lambda c, s, v, t=topic, is_sim=sim: on_event(
-                c, s.get("field_name", "value"), v, t, is_sim
+            kwargs["on_value"] = lambda c, s, v, t=topic, sim=is_simulated: on_event(
+                c, s.get("field_name", "value"), v, t, sim
             )
         else:
-            kwargs["on_state_change"] = lambda c, s, v, t=topic, is_sim=sim: on_event(
-                c, s.get("field_name", "active"), v, t, is_sim
+            kwargs["on_state_change"] = lambda c, s, v, t=topic, sim=is_simulated: on_event(
+                c, s.get("field_name", "active"), v, t, sim
             )
 
         t = threading.Thread(target=runner, kwargs=kwargs, daemon=True)

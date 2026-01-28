@@ -15,6 +15,7 @@
       "type": "button",
       "simulated": true,
       "delay": 2,
+      "pin": 17,
       "field_name": "status",
       "topic": "home/ds1",
       "description": "Door Sensor (Button)"

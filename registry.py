@@ -5,9 +5,16 @@ from simulators.membrane_switch_sim import ms_sim
 from simulators.buzzer_sim import buzzer_sim
 from simulators.keyboard_sim import keyboard_sim
 from simulators.ultrasonic_sim import ultrasonic_sim
+try:
+    from sensors.button import run_button_real
+except ImportError:
+    run_button_real = None
 
 SENSOR_REGISTRY = {
-    "button": button_sim,
+    "button": {
+            "true": run_button_real,
+            "sim": button_sim
+    },
     "pir": pir_sim,
     "membrane": ms_sim,
     "keyboard": keyboard_sim,
