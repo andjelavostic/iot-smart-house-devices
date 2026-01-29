@@ -1,3 +1,4 @@
+from sensors.led import run_led_real
 from simulators.led_sim import led_sim
 from simulators.button_sim import button_sim
 try:
@@ -40,7 +41,10 @@ SENSOR_REGISTRY = {
     "ultrasonic":ultrasonic_sim
 }
 ACTUATOR_REGISTRY = {
-    "led": led_sim,
+    "led":{
+        "true":run_led_real,
+        "sim":led_sim
+    },
     "buzzer": {
         "true": run_buzzer_real,
         "sim": buzzer_sim

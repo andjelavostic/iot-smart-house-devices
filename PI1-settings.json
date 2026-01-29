@@ -64,6 +64,7 @@
       "type": "led",
       "simulated": true,
       "delay": 1,
+      "pin": 18,
       "field_name": "state",
       "topic": "home/dl",
       "description": "Door Light (LED diode)"
