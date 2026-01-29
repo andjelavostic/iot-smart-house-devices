@@ -1,4 +1,7 @@
-import RPi.GPIO as GPIO
+try:
+    import RPi.GPIO as GPIO
+except ImportError:
+    GPIO = None
 import time
 
 def run_ultrasonic_real(sensor_code, delay, on_value, stop_event, settings=None):

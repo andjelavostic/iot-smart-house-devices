@@ -1,4 +1,7 @@
-import RPi.GPIO as GPIO
+try:
+    import RPi.GPIO as GPIO
+except ImportError:
+    GPIO = None
 import time
 
 def run_led_real(actuator_code, stop_event, settings=None, on_state_change=None):

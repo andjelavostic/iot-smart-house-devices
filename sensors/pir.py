@@ -1,4 +1,7 @@
-import RPi.GPIO as GPIO
+try:
+    import RPi.GPIO as GPIO
+except ImportError:
+    GPIO = None
 import time
 
 def run_pir_real(sensor_code, settings, on_state_change, stop_event):
