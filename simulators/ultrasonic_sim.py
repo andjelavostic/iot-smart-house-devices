@@ -2,32 +2,6 @@ import math
 import time
 import random
 
-def generate_distance(delay, min_dist=2, max_dist=400, initial=None, step=5):
-    """
-    Generator koji simulira realističnu promenu udaljenosti.
-    step = maksimalna promena po iteraciji.
-    """
-    if initial is None:
-        distance = random.randint(min_dist, max_dist)
-    else:
-        distance = initial
-
-    direction = random.choice([-1, 1])  # 1 = udaljava se, -1 = približava se
-
-    while True:
-        time.sleep(delay)
-        # Promena udaljenosti po step, ne random preko celog raspona
-        distance += direction * random.randint(1, step)
-
-        # Ako pređe granice, promeni smer
-        if distance <= min_dist:
-            distance = min_dist
-            direction = 1
-        elif distance >= max_dist:
-            distance = max_dist
-            direction = -1
-
-        yield distance
 def generate_distance_realistic(delay=0.1, min_dist=50, max_dist=200, frequency=0.05, max_speed=3):
     """
     Realistična simulacija senzora.

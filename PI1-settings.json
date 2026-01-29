@@ -53,6 +53,8 @@
       "type": "ultrasonic",
       "simulated": true,
       "delay": 2,
+      "trig_pin":23,
+      "echo_pin":24,
       "field_name": "distance",
       "topic": "home/dus1",
       "description": "Door Ultrasonic Sensor"
