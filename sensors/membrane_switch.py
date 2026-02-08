@@ -4,7 +4,7 @@ except ImportError:
     GPIO = None
 import time
 
-def run_membrane_real(sensor_code, settings, on_value, stop_event):
+def run_membrane_real(sensor_code,delay, on_value, stop_event,settings):
     ROW_PINS = settings['rows']    
     COL_PINS = settings['cols']    
     
