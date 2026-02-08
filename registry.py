@@ -1,3 +1,4 @@
+from sensors.dht import run_dht_real
 from sensors.led import run_led_real
 from sensors.ultrasonic import run_ultrasonic_real
 from simulators.led_sim import led_sim
@@ -51,8 +52,11 @@ SENSOR_REGISTRY = {
         "sim": lambda sensor_code, delay, on_value, stop_event, settings: 
                 gyro_simulator(delay, lambda a, g, p, s: on_value(sensor_code, s, {"accel": a, "gyro": g}), stop_event, None, settings),
     },
-    "dht": lambda sensor_code, delay, on_value, stop_event, settings:
+    "dht": {
+        "true":run_dht_real,
+        "sim": lambda sensor_code, delay, on_value, stop_event, settings:
             dht_simulator(delay, lambda h, t, p, s: on_value(sensor_code, s, {"temp": t, "hum": h}), stop_event, None, settings)
+    }
 }
 ACTUATOR_REGISTRY = {
     "led":{
