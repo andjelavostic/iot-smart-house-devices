@@ -26,6 +26,8 @@ from simulators.ultrasonic_sim import ultrasonic_sim
 from simulators.gyroscope_sim import gyro_simulator
 from simulators.dht_sim import dht_simulator
 from simulators._4sd_sim import run_4sd_simulator
+from sensors.gyro.gyro import run_gyro_real
+
 SENSOR_REGISTRY = {
     "button": {
         "true": run_button_real,
@@ -44,9 +46,11 @@ SENSOR_REGISTRY = {
         "true":run_ultrasonic_real,
         "sim":ultrasonic_sim
     },
-    "gyro": lambda sensor_code, delay, on_value, stop_event, settings: 
-            gyro_simulator(delay, lambda a, g, p, s: on_value(sensor_code, s, {"accel": a, "gyro": g}), stop_event, None, settings),
-    
+    "gyro": {
+        "true": run_gyro_real,
+        "sim": lambda sensor_code, delay, on_value, stop_event, settings: 
+                gyro_simulator(delay, lambda a, g, p, s: on_value(sensor_code, s, {"accel": a, "gyro": g}), stop_event, None, settings),
+    },
     "dht": lambda sensor_code, delay, on_value, stop_event, settings:
             dht_simulator(delay, lambda h, t, p, s: on_value(sensor_code, s, {"temp": t, "hum": h}), stop_event, None, settings)
 }
