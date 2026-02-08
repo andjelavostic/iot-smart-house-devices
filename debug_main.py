@@ -49,7 +49,7 @@ def run_debug():
         callback = lambda c, s, v: terminal_callback(c, s.get("field_name", "data"), v)
         
         # jer različiti senzori koriste različite nazive za callback funkcije
-        if s_cfg["type"] in ["keyboard", "membrane", "ultrasonic"]:
+        if s_cfg["type"] in ["keyboard", "membrane", "ultrasonic", "gyro", "dht"]:
             kwargs["on_value"] = callback
         else:
             kwargs["on_state_change"] = callback

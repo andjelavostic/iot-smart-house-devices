@@ -118,7 +118,7 @@ def main():
         }
 
         # Callback koji šalje is_simulated u on_event
-        if sensor_cfg["type"] in ["keyboard", "membrane", "ultrasonic"]:
+        if sensor_cfg["type"] in ["keyboard", "membrane", "ultrasonic", "gyro", "dht"]:
             kwargs["on_value"] = lambda c, s, v, t=topic, sim=is_simulated: on_event(
                 c, s.get("field_name", "value"), v, t, sim
             )
