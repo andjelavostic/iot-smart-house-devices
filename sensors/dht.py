@@ -78,29 +78,42 @@ class DHT(object):
 		if(self.bits[4] is not sumChk):
 			return self.DHTLIB_ERROR_CHECKSUM
 		return self.DHTLIB_OK
-
-
+def parseCheckCode(code):
+	if code == 0:
+		return "DHTLIB_OK"
+	elif code == -1:
+		return "DHTLIB_ERROR_CHECKSUM"
+	elif code == -2:
+		return "DHTLIB_ERROR_TIMEOUT"
+	elif code == -999:
+		return "DHTLIB_INVALID_VALUE"
 def run_dht_real(delay, callback, stop_event, publish_event, settings):
     """
-    Isti potpis kao dht_simulator:
-    (delay, callback, stop_event, publish_event, settings)
+    Isti potpis kao dht_simulator
     """
 
-    pin = settings.get("pin")  # pin iz settings
+    pin = settings.get("pin", 11)
     dht = DHT(pin)
 
-    while not stop_event.is_set():
-        chk = dht.readDHT11()
+    try:
+        while not stop_event.is_set():
+            chk = dht.readDHT11()
+            status = parseCheckCode(chk)
 
-        if chk == DHT.DHTLIB_OK:
             humidity = dht.humidity
             temperature = dht.temperature
 
-            callback(humidity, temperature, publish_event, settings)
+            # callback dobija ISTU STRUKTURU svaki put
+            callback(
+                humidity,
+                temperature,
+                status,
+                publish_event,
+                settings
+            )
 
-        # ako ne uspe čitanje – samo preskoči ciklus
-        time.sleep(delay)
+            time.sleep(delay)
 
-    GPIO.cleanup()
-		
-		
+    finally:
+        if GPIO is not None:
+            GPIO.cleanup()
