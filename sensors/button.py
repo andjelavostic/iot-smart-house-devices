@@ -4,7 +4,12 @@ except ImportError:
     GPIO = None
 import time
 
-def run_button_real(sensor_code, settings, on_state_change, stop_event):
+
+def run_button_real(sensor_code,
+    delay,
+    on_state_change,
+    stop_event,
+    settings):
     pin = settings['pin']
     GPIO.setup(pin, GPIO.IN, pull_up_down=GPIO.PUD_UP)
     
