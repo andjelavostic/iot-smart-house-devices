@@ -27,6 +27,22 @@
       "topic": "home/dht2",
       "description": "Master Bedroom Temperature and Humidity"
     },
+    "IR": {
+        "type": "ir",
+        "simulated": true,
+        "delay": 1,
+        "pin": 17,
+        "field_name": "button",
+        "topic": "home/ir1",
+        "description": "Living Room IR Sensor",
+        "button_map": {
+            "0x300ff22dd": "LEFT",
+            "0x300ffc23d": "RIGHT",
+            "0x300ff629d": "UP",
+            "0x300ffa857": "DOWN",
+            "0x300ff02fd": "OK"
+            }
+        },
     "DPIR3": {
       "type": "pir",
       "simulated": true,
