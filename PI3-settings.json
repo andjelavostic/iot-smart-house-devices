@@ -43,6 +43,16 @@
             "0x300ff02fd": "OK"
             }
         },
+    "BRGB": {
+        "type": "rgb_led",
+        "simulated": true,
+        "red_pin": 12,
+        "green_pin": 13,
+        "blue_pin": 19,
+        "field_name": "color",
+        "topic": "home/rgb",
+        "description": "Bedroom RGB LED"
+    },
     "DPIR3": {
       "type": "pir",
       "simulated": true,
