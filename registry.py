@@ -2,10 +2,12 @@ from sensors.dht import run_dht_real
 from sensors.ir import run_ir_real
 from sensors.lcd.lcd import run_lcd_real
 from sensors.led import run_led_real
+from sensors.rgb_led import run_rgb_real
 from sensors.ultrasonic import run_ultrasonic_real
 from simulators.lcd_sim import lcd_sim
 from simulators.led_sim import led_sim
 from simulators.button_sim import button_sim
+from simulators.rgb_led_sim import rgb_sim
 try:
     from sensors.button import run_button_real
 except ImportError:
@@ -78,5 +80,9 @@ ACTUATOR_REGISTRY = {
     "lcd":{
         "true":run_lcd_real,
         "sim":lcd_sim
+    },
+    "rgb_led": {
+        "true": run_rgb_real,
+        "sim": rgb_sim
     }
 }
