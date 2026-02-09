@@ -1,6 +1,8 @@
 from sensors.dht import run_dht_real
+from sensors.lcd.lcd import run_lcd_real
 from sensors.led import run_led_real
 from sensors.ultrasonic import run_ultrasonic_real
+from simulators.lcd_sim import lcd_sim
 from simulators.led_sim import led_sim
 from simulators.button_sim import button_sim
 try:
@@ -67,5 +69,9 @@ ACTUATOR_REGISTRY = {
         "true": run_buzzer_real,
         "sim": buzzer_sim
     },
-    "7segment": run_4sd_simulator 
+    "7segment": run_4sd_simulator ,
+    "lcd":{
+        "true":run_lcd_real,
+        "sim":lcd_sim
+    }
 }

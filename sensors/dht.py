@@ -92,7 +92,7 @@ def run_dht_real(delay, callback, stop_event, publish_event, settings):
     Isti potpis kao dht_simulator
     """
 
-    pin = settings.get("pin", 11)
+    pin = settings.get("pin")
     dht = DHT(pin)
 
     try:

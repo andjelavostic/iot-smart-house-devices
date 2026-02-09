@@ -1,0 +1,57 @@
+{
+  "mode": "SIMULATION",
+  "runs_on": "PI3",
+  "device_hostname": "RPi_Bedroom_LivingRoom",
+  "mqtt": {
+    "broker": "localhost",
+    "port": 1883,
+    "batch_size": 5,
+    "publish_interval": 5
+  },
+  "sensors": {
+    "DHT1": {
+      "type": "dht",
+      "simulated": true,
+      "delay": 4,
+      "pin": 16,
+      "field_name": "temp_hum",
+      "topic": "home/dht1",
+      "description": "Bedroom Temperature and Humidity"
+    },
+    "DHT2": {
+      "type": "dht",
+      "simulated": true,
+      "delay": 4,
+      "pin": 16,
+      "field_name": "temp_hum",
+      "topic": "home/dht2",
+      "description": "Master Bedroom Temperature and Humidity"
+    },
+    "DPIR3": {
+      "type": "pir",
+      "simulated": true,
+      "delay": 3,
+      "pin": 6,
+      "field_name": "motion",
+      "topic": "home/dpir3",
+      "description": "Living Room Motion Sensor"
+    }
+  },
+  "actuators": {
+    "LCD": {
+      "type": "lcd",
+      "simulated": true,
+      "delay": 2,
+      "pin_rs": 0,
+      "pin_e": 2,
+      "pins_db": [4,5,6,7],
+      "cols": 16,
+      "lines": 2,
+      "backlight": true,
+      "message": "Welcome!",
+      "field_name": "lcd_message",
+      "topic": "home/lcd",
+      "description": "Living Room LCD Display"
+    }
+  }
+}
