@@ -27,7 +27,6 @@ try:
     from sensors.buzzer import run_buzzer_real
 except ImportError:
     run_buzzer_real = None
-from simulators.keyboard_sim import keyboard_sim
 from simulators.ultrasonic_sim import ultrasonic_sim
 from simulators.gyroscope_sim import gyro_simulator
 from simulators.dht_sim import dht_simulator
@@ -47,7 +46,6 @@ SENSOR_REGISTRY = {
         "true": run_membrane_real, 
         "sim": ms_sim 
     },
-    "keyboard": keyboard_sim,
     "ultrasonic":{
         "true":run_ultrasonic_real,
         "sim":ultrasonic_sim
@@ -76,7 +74,10 @@ ACTUATOR_REGISTRY = {
         "true": run_buzzer_real,
         "sim": buzzer_sim
     },
-    "7segment": run_4sd_simulator ,
+    "7segment": {
+        "true": None,
+        "sim": run_4sd_simulator
+    },
     "lcd":{
         "true":run_lcd_real,
         "sim":lcd_sim
