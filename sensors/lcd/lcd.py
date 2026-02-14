@@ -4,8 +4,16 @@ try:
 except ImportError:
     GPIO = None
 
+import os
+import sys
 import time
-from LCD_model import LCD # tvoja klasa iz lab vežbi
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
+try:
+    from LCD_model import LCD # tvoja klasa iz lab vežbi
+except ImportError as e:
+    print(f"Greška pri uvozu LCD_model: {e}")
+    LCD_model = None
+
 
 def run_lcd_real(sensor_code, delay, on_value, stop_event, settings=None):
     """

@@ -1,6 +1,14 @@
 # sensors/gyroscope.py
+import os
+import sys
 import time
-from MPU6050 import MPU6050  
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
+
+try:
+    from MPU6050 import MPU6050
+except ImportError as e:
+    print(f"Greška pri uvozu MPU6050: {e}")
+    MPU6050 = None
 
 def run_gyro_real(sensor_code, delay, on_value, stop_event, settings):
     # Inicijalizacija MPU6050 objekta
