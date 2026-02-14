@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Smart House Dashboard</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+    <style>
+        body { font-family: sans-serif; background: #1a1a1a; color: white; padding: 20px; }
+        h1 { margin-bottom: 10px; }
+        .pi-panel { margin-bottom: 40px; }
+        .pi-title { font-size: 24px; margin-bottom: 15px; color: #4CAF50; }
+
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px; }
+        .card { background: #333; padding: 15px; border-radius: 8px; border-left: 5px solid #4CAF50; }
+        .alarm-on { border-left-color: #f44336; animation: blink 1s infinite; }
+        .led-on { border-left-color: #2196F3; }
+        .buzzer-on { border-left-color: #FF9800; }
+        .pir-on { border-left-color: #9C27B0; }
+        @keyframes blink { 50% { opacity: 0.5; } }
+
+        button { background: #4CAF50; color: white; border: none; padding: 10px; cursor: pointer; margin-top: 10px; }
+        input { padding: 10px; width: 80px; }
+        p { margin: 5px 0; }
+    </style>
+</head>
+<body>
+    <h1>Smart House Monitoring</h1>
+
+    <div class="pi-panel" id="pi1-panel">
+        <div class="pi-title">PI1 Status</div>
+        <div class="grid">
+            <div class="card" id="card-ALARM">
+                <h3>Sistem Alarm</h3>
+                <p id="alarm-status">Status: ---</p>
+            </div>
+            <div class="card">
+                <h3>Ljudi u kući</h3>
+                <h2 id="people-count">0</h2>
+            </div>
+            <div class="card" id="card-DS1">
+                <h3>Senzor Vrata (DS1)</h3>
+                <p id="ds1-val">Vrijednost: 0</p>
+            </div>
+            <div class="card" id="card-DUS1">
+                <h3>Rastojanje (DUS1)</h3>
+                <p id="dus1-val">0 cm</p>
+            </div>
+            <div class="card" id="card-DL">
+                <h3>LED Svjetlo (DL)</h3>
+                <p id="dl-val">Isključeno</p>
+            </div>
+            <div class="card" id="card-DB">
+                <h3>Buzzer (DB)</h3>
+                <p id="db-val">Isključen</p>
+            </div>
+            <div class="card" id="card-DPIR1">
+                <h3>PIR (DPIR1)</h3>
+                <p id="dpir1-val">Mirno</p>
+            </div>
+            <div class="card" id="card-DMS">
+                <h3>Membrane (DMS)</h3>
+                <p id="dms-val">---</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const socket = io();
+
+        function updateAlarmStatus(isActive) {
+            const el = document.getElementById('card-ALARM');
+            const status = document.getElementById('alarm-status');
+            if (isActive) {
+                el.classList.add('alarm-on');
+                status.innerText = "ALARM AKTIVAN!";
+            } else {
+                el.classList.remove('alarm-on');
+                status.innerText = "Sistem OK";
+            }
+        }
+
+        socket.on('device_update', function(data) {
+            if (data.pi !== "PI1") return;
+
+            // DS1
+            if(data.device === "DS1") document.getElementById('ds1-val').innerText = "Vrednost: " + data.value;
+
+            // DUS1
+            if(data.device === "DUS1") document.getElementById('dus1-val').innerText = data.value + " cm";
+
+            // Ljudi u kući
+            if(data.measurement === "people") document.getElementById('people-count').innerText = data.value;
+
+            // DL
+            if(data.device === "DL") {
+                const el = document.getElementById('card-DL');
+                document.getElementById('dl-val').innerText = data.value ? "Uključeno" : "Isključeno";
+                el.classList.toggle('led-on', data.value);
+            }
+
+            // DB + Alarm
+            if(data.device === "DB") {
+                const el = document.getElementById('card-DB');
+                document.getElementById('db-val').innerText = data.value ? "Uključen" : "Isključen";
+                el.classList.toggle('buzzer-on', data.value);
+
+                // sinhronizacija alarma sa DB
+                updateAlarmStatus(data.value);
+            }
+
+            // PIR
+            if(data.device === "DPIR1") {
+                const el = document.getElementById('card-DPIR1');
+                if(data.value) {
+                    el.classList.add('pir-on');
+                    document.getElementById('dpir1-val').innerText = "Pokret detektovan!";
+                    setTimeout(()=>{ 
+                        el.classList.remove('pir-on'); 
+                        document.getElementById('dpir1-val').innerText="Mirno"; 
+                    }, 2000);
+                }
+            }
+
+            // DMS
+            if(data.device === "DMS") {
+                document.getElementById('dms-val').innerText = (typeof data.value === 'object') ? JSON.stringify(data.value) : data.value;
+            }
+        });
+    </script>
+</body>
+</html>
