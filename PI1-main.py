@@ -208,8 +208,10 @@ def main():
     # Pokretanje senzora
     for code, cfg in settings.get("sensors", {}).items():
         entry = SENSOR_REGISTRY.get(cfg["type"])
-        runner = entry["sim"]
-
+        #runner = entry["sim"]
+        is_simulated = cfg.get("simulated", True)
+        runner = entry["sim"] if is_simulated else entry["true"]
+        
         threading.Thread(
             target=runner,
             kwargs={
@@ -227,7 +229,9 @@ def main():
     # Pokretanje aktuatora
     for code, cfg in settings.get("actuators", {}).items():
         entry = ACTUATOR_REGISTRY.get(cfg["type"])
-        runner = entry["sim"]
+        #runner = entry["sim"]
+        is_simulated = cfg.get("simulated", True)
+        runner = entry["sim"] if is_simulated else entry["true"]
 
         threading.Thread(
             target=runner,
