@@ -12,38 +12,38 @@
     "DS2": {
       "type": "button",
       "simulated": true,
-      "delay": 5,
+      "delay": 7,
       "pin": 5,
       "field_name": "status",
-      "topic": "home/ds2",
+      "topic": "home/PI2/ds2",
       "description": "Garage Door Sensor"
     },
     "DPIR2": {
       "type": "pir",
       "simulated": true,
-      "delay": 3,
+      "delay": 5,
       "pin": 6,
       "field_name": "motion",
-      "topic": "home/dpir2",
+      "topic": "home/PI2/dpir2",
       "description": "Garage Motion Sensor"
     },
     "DUS2": {
       "type": "ultrasonic",
       "simulated": true,
-      "delay": 2,
+      "delay": 7,
       "trig_pin": 12,
       "echo_pin": 13,
       "field_name": "distance",
-      "topic": "home/dus2",
+      "topic": "home/PI2/dus2",
       "description": "Garage Entrance Distance"
     },
     "DHT3": {
       "type": "dht",
       "simulated": true,
-      "delay": 4,
+      "delay": 10,
       "pin": 16,
       "field_name": "temp_hum",
-      "topic": "home/dht3",
+      "topic": "home/PI2/dht3",
       "description": "Kitchen Temperature and Humidity"
     },
     "BTN": {
@@ -52,15 +52,15 @@
       "delay": 10,
       "pin": 20,
       "field_name": "status",
-      "topic": "home/btn_kitchen",
+      "topic": "home/PI2/btn",
       "description": "Kitchen Timer Button"
     },
     "GSG": {
       "type": "gyro",
       "simulated": true,
-      "delay": 2,
+      "delay": 7,
       "field_name": "gyro_data",
-      "topic": "home/gsg",
+      "topic": "home/PI2/gsg",
       "description": "Gyroscope Sensor"
     }
   },
@@ -70,7 +70,7 @@
       "simulated": true,
       "pin_list": [17, 18, 27, 22, 23, 24, 25, 4],
       "field_name": "display_val",
-      "topic": "home/4sd",
+      "topic": "home/PI2/4sd",
       "description": "Kitchen 4-Digit 7-Segment Display"
     }
   }
