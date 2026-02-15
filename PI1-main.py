@@ -28,6 +28,7 @@ data_batch = []
 # MQTT CALLBACKS
 def on_connect(client, userdata, flags, rc):
     client.subscribe("home/commands/PI1/#")
+    client.subscribe("home/PI2/alarm_trigger")
 
 def on_message(client, userdata, msg):
     payload = json.loads(msg.payload.decode())
@@ -44,6 +45,12 @@ def on_message(client, userdata, msg):
     if "actuators" in settings and device_code in settings["actuators"]:
         settings["actuators"][device_code]["state"] = bool(payload["value"])
         print(f"[MQTT COMMAND] {device_code} set to {payload['value']}")
+
+    if msg.topic == "home/PI2/alarm_trigger":
+        if payload.get("value"):
+            activate_alarm()
+        else:
+            deactivate_alarm()
 
 mqtt_client.on_connect = on_connect
 mqtt_client.on_message = on_message
