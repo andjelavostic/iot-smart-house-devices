@@ -63,6 +63,54 @@
         </div>
     </div>
 
+    <!--PI2-->
+    <div class="pi-panel" id="pi2-panel">
+        <div class="pi-title">PI2 Status (Garage + Kitchen)</div>
+        <div class="grid">
+
+            <div class="card">
+                <h3>Ljudi (PI2)</h3>
+                <h2 id="people-count-pi2">0</h2>
+            </div>
+
+            <div class="card" id="card-DS2">
+                <h3>Door Sensor (DS2)</h3>
+                <p id="ds2-val">Vrijednost: 0</p>
+            </div>
+
+            <div class="card" id="card-DUS2">
+                <h3>Distance (DUS2)</h3>
+                <p id="dus2-val">0 cm</p>
+            </div>
+
+            <div class="card" id="card-DPIR2">
+                <h3>PIR (DPIR2)</h3>
+                <p id="dpir2-val">Mirno</p>
+            </div>
+
+            <div class="card" id="card-4SD">
+                <h3>Kuhinjska Štoperica (4SD)</h3>
+                <p id="display-val">00:00</p>
+            </div>
+
+            <div class="card" id="card-BTN">
+                <h3>Kitchen Button</h3>
+                <p id="btn-val">---</p>
+            </div>
+
+            <div class="card" id="card-DHT3">
+                <h3>DHT3 (Kitchen)</h3>
+                <p id="dht3-val">---</p>
+            </div>
+
+            <div class="card" id="card-GSG">
+                <h3>Gyroscope (GSG)</h3>
+                <p id="gsg-val">---</p>
+            </div>
+
+        </div>
+    </div>
+
     <script>
         const socket = io();
 
@@ -79,52 +127,125 @@
         }
 
         socket.on('device_update', function(data) {
-            if (data.pi !== "PI1") return;
 
-            // DS1
-            if(data.device === "DS1") document.getElementById('ds1-val').innerText = "Vrednost: " + data.value;
+            // ================= PI1 =================
+            if (data.pi === "PI1") {
 
-            // DUS1
-            if(data.device === "DUS1") document.getElementById('dus1-val').innerText = data.value + " cm";
+                if(data.device === "DS1")
+                    document.getElementById('ds1-val').innerText =
+                        "Vrednost: " + data.value;
 
-            // Ljudi u kući
-            if(data.measurement === "people") document.getElementById('people-count').innerText = data.value;
+                if(data.device === "DUS1")
+                    document.getElementById('dus1-val').innerText =
+                        data.value + " cm";
 
-            // DL
-            if(data.device === "DL") {
-                const el = document.getElementById('card-DL');
-                document.getElementById('dl-val').innerText = data.value ? "Uključeno" : "Isključeno";
-                el.classList.toggle('led-on', data.value);
+                if(data.measurement === "people")
+                    document.getElementById('people-count').innerText =
+                        data.value;
+
+                if(data.device === "DL") {
+                    const el = document.getElementById('card-DL');
+                    document.getElementById('dl-val').innerText =
+                        data.value ? "Uključeno" : "Isključeno";
+                    el.classList.toggle('led-on', data.value);
+                }
+
+                if(data.device === "DB") {
+                    const el = document.getElementById('card-DB');
+                    document.getElementById('db-val').innerText =
+                        data.value ? "Uključen" : "Isključen";
+                    el.classList.toggle('buzzer-on', data.value);
+
+                    updateAlarmStatus(data.value);
+                }
+
+                if(data.device === "DPIR1") {
+                    const el = document.getElementById('card-DPIR1');
+                    if(data.value) {
+                        el.classList.add('pir-on');
+                        document.getElementById('dpir1-val').innerText =
+                            "Pokret detektovan!";
+                        setTimeout(()=>{
+                            el.classList.remove('pir-on');
+                            document.getElementById('dpir1-val').innerText =
+                                "Mirno";
+                        },2000);
+                    }
+                }
+
+                if(data.device === "DMS")
+                    document.getElementById('dms-val').innerText =
+                        (typeof data.value === 'object')
+                            ? JSON.stringify(data.value)
+                            : data.value;
             }
 
-            // DB + Alarm
-            if(data.device === "DB") {
-                const el = document.getElementById('card-DB');
-                document.getElementById('db-val').innerText = data.value ? "Uključen" : "Isključen";
-                el.classList.toggle('buzzer-on', data.value);
+            // ================= PI2 =================
+            if (data.pi === "PI2") {
 
-                // sinhronizacija alarma sa DB
-                updateAlarmStatus(data.value);
-            }
+                if(data.device === "DS2")
+                    document.getElementById('ds2-val').innerText =
+                        "Vrijednost: " + data.value;
 
-            // PIR
-            if(data.device === "DPIR1") {
-                const el = document.getElementById('card-DPIR1');
-                if(data.value) {
-                    el.classList.add('pir-on');
-                    document.getElementById('dpir1-val').innerText = "Pokret detektovan!";
-                    setTimeout(()=>{ 
-                        el.classList.remove('pir-on'); 
-                        document.getElementById('dpir1-val').innerText="Mirno"; 
-                    }, 2000);
+                if(data.device === "DUS2")
+                    document.getElementById('dus2-val').innerText =
+                        data.value + " cm";
+
+                if(data.device === "DPIR2") {
+                    const el = document.getElementById('card-DPIR2');
+                    if(data.value) {
+                        el.classList.add('pir-on');
+                        document.getElementById('dpir2-val').innerText =
+                            "Pokret!";
+                        setTimeout(()=>{
+                            el.classList.remove('pir-on');
+                            document.getElementById('dpir2-val').innerText =
+                                "Mirno";
+                        },2000);
+                    }
+                }
+
+                if(data.measurement === "people")
+                    document.getElementById('people-count-pi2').innerText =
+                        data.value;
+
+                if(data.device === "4SD")
+                    document.getElementById('display-val').innerText =
+                        data.value;
+
+                if(data.device === "BTN")
+                    document.getElementById('btn-val').innerText =
+                        data.value ? "Pritisnuto" : "Idle";
+
+                if(data.device === "DHT3")
+                    document.getElementById('dht3-val').innerText =
+                        JSON.stringify(data.value);
+
+                if (data.device === "GSG") {
+                    const gsgValElement = document.getElementById('gsg-val');
+                    
+                    if (data.value && data.value.accel && data.value.gyro) {
+                        const a = data.value.accel;
+                        const g = data.value.gyro;
+
+                        gsgValElement.innerHTML = `
+                            <div style="margin-bottom: 5px;">
+                                <strong style="color: #4CAF50;">Akselerometar (m/s²):</strong><br>
+                                X: ${a[0].toFixed(2)} | Y: ${a[1].toFixed(2)} | Z: ${a[2].toFixed(2)}
+                            </div>
+                            <div>
+                                <strong style="color: #2196F3;">Žiroskop (°/s):</strong><br>
+                                X: ${g[0].toFixed(2)} | Y: ${g[1].toFixed(2)} | Z: ${g[2].toFixed(2)}
+                            </div>
+                        `;
+                    } else {
+                        gsgValElement.innerText = "Podaci nedostupni";
+                    }
                 }
             }
 
-            // DMS
-            if(data.device === "DMS") {
-                document.getElementById('dms-val').innerText = (typeof data.value === 'object') ? JSON.stringify(data.value) : data.value;
-            }
         });
+
     </script>
 </body>
 </html>
