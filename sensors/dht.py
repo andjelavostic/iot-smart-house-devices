@@ -87,33 +87,16 @@ def parseCheckCode(code):
 		return "DHTLIB_ERROR_TIMEOUT"
 	elif code == -999:
 		return "DHTLIB_INVALID_VALUE"
-def run_dht_real(delay, callback, stop_event, publish_event, settings):
-    """
-    Isti potpis kao dht_simulator
-    """
 
+def run_dht_real(sensor_code, delay, stop_event, on_value, settings): # Usaglašen potpis
     pin = settings.get("pin")
     dht = DHT(pin)
-
     try:
         while not stop_event.is_set():
-            chk = dht.readDHT11()
-            status = parseCheckCode(chk)
-
-            humidity = dht.humidity
-            temperature = dht.temperature
-
-            # callback dobija ISTU STRUKTURU svaki put
-            callback(
-                humidity,
-                temperature,
-                status,
-                publish_event,
-                settings
-            )
-
+            dht.readDHT11()  
+            val = {"temperature": dht.temperature, "humidity": dht.humidity}
+            on_value(sensor_code, settings, val)
             time.sleep(delay)
-
     finally:
         if GPIO is not None:
             GPIO.cleanup()
