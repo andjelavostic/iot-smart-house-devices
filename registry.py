@@ -52,13 +52,11 @@ SENSOR_REGISTRY = {
     },
     "gyro": {
         "true": run_gyro_real,
-        "sim": lambda sensor_code, delay, on_value, stop_event, settings: 
-                gyro_simulator(delay, lambda a, g, p, s: on_value(sensor_code, s, {"accel": a, "gyro": g}), stop_event, None, settings),
+        "sim": gyro_simulator
     },
     "dht": {
         "true":run_dht_real,
-        "sim": lambda sensor_code, delay, on_value, stop_event, settings:
-            dht_simulator(delay, lambda h, t, p, s: on_value(sensor_code, s, {"temp": t, "hum": h}), stop_event, None, settings)
+        "sim": dht_simulator
     },
     "ir":{
         "true":run_ir_real,
