@@ -25,10 +25,11 @@ state = {
 batch_lock = threading.Lock()
 data_batch = []
 
-# MQTT CALLBACKS
+# MQTT CALLBACKSa
 def on_connect(client, userdata, flags, rc):
     client.subscribe("home/commands/PI1/#")
     client.subscribe("home/PI2/alarm_trigger")
+    client.subscribe("home/PI3/alarm_trigger")
 
 def on_message(client, userdata, msg):
     payload = json.loads(msg.payload.decode())
@@ -51,6 +52,12 @@ def on_message(client, userdata, msg):
             activate_alarm()
         else:
             deactivate_alarm()
+    if msg.topic == "home/PI3/alarm_trigger":
+        if payload.get("value"):
+            activate_alarm()
+        else:
+            deactivate_alarm()
+
 
 mqtt_client.on_connect = on_connect
 mqtt_client.on_message = on_message
