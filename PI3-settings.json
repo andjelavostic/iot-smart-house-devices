@@ -36,22 +36,12 @@
         "topic": "home/ir1",
         "description": "Living Room IR Sensor",
         "button_map": {
-            "0x300ff22dd": "LEFT",
-            "0x300ffc23d": "RIGHT",
-            "0x300ff629d": "UP",
-            "0x300ffa857": "DOWN",
-            "0x300ff02fd": "OK"
-            }
-        },
-    "BRGB": {
-        "type": "rgb_led",
-        "simulated": true,
-        "red_pin": 12,
-        "green_pin": 13,
-        "blue_pin": 19,
-        "field_name": "color",
-        "topic": "home/rgb",
-        "description": "Bedroom RGB LED"
+              "0x300ff02fd": "POWER", 
+              "0x300ff629d": "COLOR_UP",
+              "0x300ffa857": "COLOR_DOWN",
+              "0x300ff22dd": "BRIGHT_DOWN",
+              "0x300ffc23d": "BRIGHT_UP"
+        }
     },
     "DPIR3": {
       "type": "pir",
@@ -64,6 +54,17 @@
     }
   },
   "actuators": {
+    "BRGB": {
+        "type": "rgb_led",
+        "simulated": true,
+        "red_pin": 12,
+        "green_pin": 13,
+        "blue_pin": 19,
+        "color": [0,0,0],
+        "field_name": "color",
+        "topic": "home/rgb",
+        "description": "Bedroom RGB LED"
+    },
     "LCD": {
       "type": "lcd",
       "simulated": true,

@@ -6,7 +6,7 @@ from settings import load_settings_spec
 from registry import ACTUATOR_REGISTRY, SENSOR_REGISTRY
 
 # settings
-settings = load_settings_spec('PI1-settings.json')
+settings = load_settings_spec('PI1-settings-saver.json')
 mqtt_config = settings.get("mqtt", {})
 mqtt_client = mqtt.Client()
 
