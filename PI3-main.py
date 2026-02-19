@@ -104,16 +104,31 @@ def lcd_rotation():
     idx = 0
     while True:
         key = dht_keys[idx % 3]
-        data = state["dht"].get(key)
-        if data:
-            temp = data.get('temperature', '--')
-            hum = data.get('humidity', '--')
+        raw_data = state["dht"].get(key)
+        
+        temp, hum = "--", "--"
+        
+        if raw_data:
+            # Ako je podatak rečnik (što DHT jeste)
+            if isinstance(raw_data, dict):
+                # Proveravamo da li je simulator spakovao u "value" ključ
+                inner = raw_data.get("value", raw_data)
+                if isinstance(inner, dict):
+                    temp = inner.get('temperature') or inner.get('temp', '--')
+                    hum = inner.get('humidity') or inner.get('hum', '--')
+            
             msg = f"{key}:T={temp}C H={hum}%"
         else:
             msg = f"Waiting {key}..."
             
-        # Šaljemo poruku na MQTT, on_message će je presresti i ažurirati simulator
-        mqtt_client.publish("home/PI3/lcd", json.dumps({"value": msg, "pi": "PI3", "device": "LCD"}))
+        # Slanje na MQTT (sa device: "LCD" da bi Dashboard prepoznao)
+        mqtt_client.publish("home/PI3/lcd", json.dumps({
+            "value": msg, 
+            "pi": "PI3", 
+            "device": "LCD",
+            "measurement": "iot_devices"
+        }))
+        
         idx += 1
         time.sleep(4)
 
