@@ -174,7 +174,7 @@ def process_logic(device_code, value):
         else:
             state["people_count"] = max(0, state["people_count"] - 1)
         
-        mqtt_client.publish("home/pi1/people", json.dumps({
+        mqtt_client.publish("home/PI1/people_count", json.dumps({
             "measurement": "people", "value": state["people_count"], "device": "SYSTEM", "pi": "PI1", "field": "count"
         }))
 

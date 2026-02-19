@@ -51,16 +51,14 @@ def process_logic(device_code, value, settings_cfg):
         mqtt_client.publish("home/PI3/rgb", json.dumps({
             "pi": "PI3", "device": "BRGB", "value": final_color
         }))
-        # --- PEOPLE COUNT ---
-        if device_code == "DPIR3" and value == True:
-            state["people_count"] += 1
-            # BITNO: Šaljemo measurement "people" da bi Dashboard prepoznao!
-            mqtt_client.publish("home/PI3/people_count", json.dumps({
-                "measurement": "people", 
-                "value": state["people_count"], 
-                "device": "SYSTEM", 
-                "pi": "PI3"
-            }))
+    if device_code == "DPIR3" and value:
+        if state["people_count"] == 0:
+            mqtt_client.publish("home/PI3/alarm_trigger",
+                json.dumps({
+                    "reason": f"{device_code} motion while empty",
+                    "value": True
+                }))
+
 
 
 # ================= EVENT HANDLER =================
@@ -93,9 +91,17 @@ def on_event(device_code, settings_cfg, value):
     mqtt_client.publish(settings_cfg.get("topic"), json.dumps(data))
 # ================= MQTT CALLBACKS =================
 def on_message(client, userdata, msg):
+    global state
+    
     try:
         payload = json.loads(msg.payload.decode())
         topic = msg.topic
+        device_code = topic.split('/')[-1].upper()
+
+        # Sinhronizacija broja ljudi (Zahtjev 5)
+        if "people_count" in topic:
+            state["people_count"] = int(payload.get("value", 0))
+            return
         
         # --- 1. KOMANDE SA DASHBOARDA (Web tasteri) ---
         if topic.startswith("home/commands/PI3"):
@@ -183,9 +189,14 @@ def publisher_task(stop_event):
                 for item in data_batch:
                     mqtt_client.publish(item["topic"], json.dumps(item))
                 data_batch.clear()
-
+# --- MQTT CALLBACKS ---
+def on_connect(client, userdata, flags, rc):
+    client.subscribe("home/commands/PI3/#")
+    client.subscribe("home/PI1/people_count") # Slušamo broj ljudi sa PI1
+    client.subscribe("home/PI2/dht3")
+    client.subscribe("home/PI3/#")
 def main():
-    mqtt_client.on_connect = lambda c, u, f, rc: [c.subscribe("home/commands/PI3/#"), c.subscribe("home/PI3/#"), c.subscribe("home/PI2/dht3")]
+    mqtt_client.on_connect = on_connect
     mqtt_client.on_message = on_message
     mqtt_client.connect("localhost", 1883, 60)
     mqtt_client.loop_start()
