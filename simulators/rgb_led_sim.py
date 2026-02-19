@@ -36,7 +36,7 @@ def rgb_sim(actuator_code, stop_event, settings=None, on_state_change=None):
                     on_state_change(actuator_code, settings, current_color)
 
             # Proveravaj promene svakih 100ms
-            time.sleep(0.5)
+            time.sleep(1)
 
     finally:
         print(f"[{actuator_code}] RGB SIMULATOR stopped")

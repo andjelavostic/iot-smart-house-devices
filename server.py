@@ -61,17 +61,42 @@ mqtt_client.loop_start()
 def index():
     return render_template('index.html')
 
-
-# slanje komandi uređajima
 @app.route('/api/command', methods=['POST'])
 def send_command():
     data = request.json
-    mqtt_client.publish(
-        f"home/commands/PI1/{data['device']}",
-        json.dumps({"value": data['value']})
-    )
+
+    pi = data.get("pi") 
+    device = data.get("device")
+    value = data.get("value")
+    color = data.get("color")
+
+    topic = f"home/commands/{pi}/{device}"
+
+    payload = {"value": value}
+    if color:
+        payload["color"] = color
+
+    print("Publishing to:", topic)
+    print("Payload:", payload)
+
+    mqtt_client.publish(topic, json.dumps(payload))
+
     return jsonify({"status": "sent"})
 
+@socketio.on("command")
+def handle_command(data):
+    print("Primljena komanda:", data)
+
+    topic = f"home/commands/{data['pi']}/{data['device']}"
+
+    payload = {
+        "value": data.get("value")
+    }
+
+    if "color" in data:
+        payload["color"] = data["color"]
+
+    mqtt_client.publish(topic, json.dumps(payload))
 
 # web kontrola alarma
 @app.route('/api/alarm', methods=['POST'])

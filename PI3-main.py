@@ -105,7 +105,7 @@ def on_message(client, userdata, msg):
         
         # --- 1. KOMANDE SA DASHBOARDA (Web tasteri) ---
         if topic.startswith("home/commands/PI3"):
-            device = payload.get("device")
+            device = device_code
             # Izvlačimo vrednost (za RGB to može biti 0/1 ili boja)
             val = payload.get("value")
             
@@ -113,11 +113,15 @@ def on_message(client, userdata, msg):
             if device == "BRGB":
                 color_list = payload.get("color")
                 if val == 0:
-                    command = "POWER_OFF"
+                    command = "POWER"
                 elif color_list == [1, 0, 0]:
                     command = "COLOR_RED"
                 elif color_list == [0, 0, 1]:
                     command = "COLOR_BLUE"
+                elif color_list == [0, 1, 0]:
+                    command = "COLOR_GREEN"
+                elif color_list == [1, 0, 1]:
+                    command = "COLOR_PURPLE"
                 else:
                     command = "POWER" # ili neka default vrednost
                 

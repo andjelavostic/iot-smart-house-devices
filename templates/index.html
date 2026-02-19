@@ -144,11 +144,11 @@
             </div>
             <div class="card">
                 <h3>Kontrola RGB (PI3)</h3>
-                <button onclick="socket.emit('command', {pi: 'PI3', device: 'BRGB', value: 1, color: [1,0,0]})">Crvena</button>
-                <button onclick="socket.emit('command', {pi: 'PI3', device: 'BRGB', value: 1, color: [0,0,1]})">Plava</button>
-                <button onclick="socket.emit('command', {pi: 'PI3', device: 'BRGB', value: 1, color: [0,1,0]})">Zelena</button>
-                <button onclick="socket.emit('command', {pi: 'PI3', device: 'BRGB', value: 1, color: [1,0,1]})">Ljubicasta</button>
-                <button onclick="socket.emit('command', {pi: 'PI3', device: 'BRGB', value: 0})">Ugasi</button>
+                <button onclick="sendCommand('PI3', 'BRGB', 1, [1,0,0])">Crvena</button>
+                <button onclick="sendCommand('PI3', 'BRGB', 1, [0,0,1])">Plava</button>
+                <button onclick="sendCommand('PI3', 'BRGB', 1, [0,1,0])">Zelena</button>
+                <button onclick="sendCommand('PI3', 'BRGB', 1, [1,0,1])">Ljubicasta</button>
+                <button onclick="sendCommand('PI3', 'BRGB', 0)">Ugasi</button>
             </div>
         </div>
     </div>
@@ -166,7 +166,11 @@
                 status.innerText = "Sistem OK";
             }
         }
-
+        function sendCommand(pi, device, value, color=null){
+            const payload = {value: value};
+            if(color) payload.color = color;
+            socket.emit("command", payload);
+        }
         socket.on('device_update', function(data) {
 
             // ================= PI1 =================
