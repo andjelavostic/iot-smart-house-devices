@@ -34,23 +34,42 @@ def on_connect(client, userdata, flags, rc):
     client.subscribe("home/PI3/alarm_trigger")
 
 def on_message(client, userdata, msg):
+    global state
     payload = json.loads(msg.payload.decode())
-    device_code = msg.topic.split('/')[-1].upper()
+    topic = msg.topic
+    device_code = topic.split('/')[-1].upper()
 
-    if device_code == "ALARM":
-        if payload.get("value") == 0:
-            deactivate_alarm()
-            state["system_armed"] = False
-        return
-
-    if device_code in settings.get("actuators", {}):
-        settings["actuators"][device_code]["state"] = bool(payload.get("value", False))
+    # ... (ostatak on_message za ALARM i aktuatore ostaje isti) ...
 
     if msg.topic in ["home/PI2/alarm_trigger", "home/PI3/alarm_trigger"]:
-        if payload.get("value"):
-            activate_alarm("external")
+        is_active = payload.get("value")
+        reason = payload.get("reason")
+
+        if is_active:
+            activate_alarm(reason)
         else:
-            deactivate_alarm()
+            # DEFINIŠEMO ŠTA SME SAMO DA SE UGASI:
+            # Dodajemo razloge koji potiču od vrata (DS2)
+            # Razlozi koji sadrže "motion" ili "intrusion" se NE nalaze ovde
+            auto_deactivate_reasons = [
+                "DS2 open while empty", 
+                "DS2 open too long", 
+                "door_stuck",
+                "external" # zavisi kako si nazvao u simulatoru
+            ]
+
+            if state["alarm_active"] and state["alarm_reason"] == reason:
+                if reason in auto_deactivate_reasons:
+                    print(f"[INFO] Senzor ({reason}) je u redu. Gasim alarm.")
+                    deactivate_alarm()
+                else:
+                    # Ovo se dešava za PIR (motion) - on pošalje False, ali mi ignorišemo
+                    print(f"[SECURITY] Razlog {reason} zahteva PIN za gašenje. Ignorišem auto-off.")
+        return
+
+    # 4. Aktuatori
+    if device_code in settings.get("actuators", {}):
+        settings["actuators"][device_code]["state"] = bool(payload.get("value", False))
 
 # --- ALARM FUNCTIONS ---
 def activate_alarm(reason):
@@ -89,15 +108,17 @@ def arm_system():
 
 # --- LOGIC ---
 def process_logic(device_code, value):
-    # 1. PIN LOGIKA (DMS) - Aktivacija i potpuno gašenje
+    # 1. PIN LOGIKA (DMS) - On je "Master" i gasi sve
     if device_code == "DMS":
         if value == state["correct_pin"]:
+            # Ako je alarm aktivan ILI je sistem samo naoružan
             if state["alarm_active"] or state["system_armed"]:
-                deactivate_alarm()
+                deactivate_alarm() # Ovo briše state["alarm_reason"]
                 state["system_armed"] = False
-                print("[SYSTEM] Sistem deaktiviran PIN-om.")
+                print("[SYSTEM] Sve deaktivirano PIN-om.")
             else:
-                print("[SYSTEM] Ispravan PIN. Aktivacija za 10s...")
+                # Ako je sve bilo ugašeno, PIN naoružava sistem
+                print("[SYSTEM] Sistem će biti aktivan za 10s...")
                 threading.Timer(10, arm_system).start()
 
     # 2. VRATA (DS1 i DS2)

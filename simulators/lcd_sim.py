@@ -1,7 +1,7 @@
 # lcd_sim.py
 import time
 
-def lcd_sim(sensor_code, delay, on_value, stop_event, settings=None):
+def lcd_sim(sensor_code, on_value, stop_event, settings=None):
     """
     Simulacija LCD-a.
     Ispisuje poruku na konzolu.
@@ -29,7 +29,7 @@ def lcd_sim(sensor_code, delay, on_value, stop_event, settings=None):
             if on_value:
                 on_value(sensor_code, settings, msg)
 
-            time.sleep(delay)
+            time.sleep(0.5)
 
     finally:
         print(f"[{sensor_code}] LCD SIM stopped")

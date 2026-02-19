@@ -6,7 +6,7 @@ except ImportError:
 import time
 from datetime import datetime
 
-def run_ir_real(sensor_code, delay, on_value, stop_event, settings=None):
+def run_ir_real(sensor_code, on_value, stop_event, settings=None):
     """
     Real IR sensor runner.
     settings mora da sadrži:
@@ -77,7 +77,7 @@ def run_ir_real(sensor_code, delay, on_value, stop_event, settings=None):
                 if on_value:
                     on_value(sensor_code, settings, name)
                 print(f"[{sensor_code}] Button pressed: {name}")
-            time.sleep(delay)
+            time.sleep(0.5)
     finally:
         GPIO.cleanup([pin])
         print(f"[{sensor_code}] IR REAL stopped")

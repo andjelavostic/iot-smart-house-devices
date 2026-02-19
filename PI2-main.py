@@ -93,62 +93,57 @@ def on_event(device_code, settings_cfg, value, topic, simulated):
 def process_logic(device_code, value, settings_cfg):
     global state, mqtt_client
 
-    # tajmer button
+    # 1. BTN - Štoperica (Ostaje tvoje)
     if device_code == "BTN" and value:
         if state["timer_blink"]:
             state["timer_blink"] = False
+            state["timer_value"] = 0
             on_event("4SD", {"topic": "home/PI2/4sd"}, "    ", "home/PI2/4sd", True)
         else:
             state["timer_value"] += state["timer_add_seconds"]
             state["timer_running"] = True
 
+    # 2. TIMERSET - Komanda sa weba (Ostaje tvoje)
     if device_code == "TIMERSET":
         state["timer_value"] = int(value)
         state["timer_running"] = True
         state["timer_blink"] = False
 
-    # DS2
+    # 3. DS2 - POPRAVLJENO (Vrata sama gase svoj alarm kad se zatvore)
     if device_code == "DS2":
-        if value:  # vrata otvorena
+        if value:  # Vrata otvorena
             state["ds2_trigger_time"] = time.time()
             if state["people_count"] == 0:
-                mqtt_client.publish(
-                    "home/PI2/alarm_trigger",
-                    json.dumps({"reason": "DS2 open while empty", "value": True})
-                )
-                threading.Timer(5, lambda: mqtt_client.publish(      #OVDEE
-                    "home/PI2/alarm_trigger",
-                    json.dumps({"reason": "DS2 alarm auto off", "value": False})
-                )).start()
+                mqtt_client.publish("home/PI2/alarm_trigger",
+                                    json.dumps({"reason": "DS2 open while empty", "value": True}))
+            
+            # Provera za "zaboravljena vrata" (5s)
+            def check_ds2_stuck():
+                if state.get("ds2_trigger_time") is not None:
+                    mqtt_client.publish("home/PI2/alarm_trigger",
+                                        json.dumps({"reason": "DS2 open too long", "value": True}))
+            threading.Timer(5.0, check_ds2_stuck).start()
         else:
-            if state["ds2_trigger_time"]:
-                duration = time.time() - state["ds2_trigger_time"]
-                if duration > 5:
-                    mqtt_client.publish(
-                        "home/PI2/alarm_trigger",
-                        json.dumps({"reason": "DS2 open too long", "value": True})
-                    )
-                    threading.Timer(5, lambda: mqtt_client.publish(
-                        "home/PI2/alarm_trigger",
-                        json.dumps({"reason": "DS2 alarm auto off", "value": False})
-                    )).start()
-                state["ds2_trigger_time"] = None
+            # VRATA ZATVORENA - Ovde gasimo oba DS2 alarma
+            state["ds2_trigger_time"] = None
+            mqtt_client.publish("home/PI2/alarm_trigger",
+                                json.dumps({"reason": "DS2 open while empty", "value": False}))
+            mqtt_client.publish("home/PI2/alarm_trigger",
+                                json.dumps({"reason": "DS2 open too long", "value": False}))
 
-    # ziroskop
+    # 4. GSG - Žiroskop (Ostaje tvoje)
     if device_code == "GSG":
         accel = value.get("accel", [0,0,0])
         magnitude = math.sqrt(sum([x**2 for x in accel]))
         if magnitude > 3.5:
-            mqtt_client.publish(
-                "home/PI2/alarm_trigger",
-                json.dumps({"reason": "GSG movement detected", "value": True})
-            )
+            mqtt_client.publish("home/PI2/alarm_trigger",
+                                json.dumps({"reason": "GSG movement detected", "value": True}))
+            # Ovde može ostati auto-off jer žiroskop nema "zatvoreno" stanje
             threading.Timer(5, lambda: mqtt_client.publish(
-                "home/PI2/alarm_trigger",
-                json.dumps({"reason": "GSG auto off", "value": False})
+                "home/PI2/alarm_trigger", json.dumps({"reason": "GSG movement detected", "value": False})
             )).start()
 
-    # DPIR2 / DUS2 people counting
+    # 5. DUS2 / DPIR2 - Brojanje ljudi (Ostaje tvoje)
     if device_code == "DUS2":
         state["last_distances"].append(value)
         if len(state["last_distances"]) > 5:
@@ -163,35 +158,25 @@ def process_logic(device_code, value, settings_cfg):
             state["people_count"] = max(0, state["people_count"] - 1)
 
         mqtt_client.publish("home/pi2/people", json.dumps({
-            "measurement": "people",
-            "value": state["people_count"],
-            "device": "SYSTEM",
-            "pi": "PI2",
-            "field": "count",
-            "simulated": True
+            "measurement": "people", "value": state["people_count"],
+            "device": "SYSTEM", "pi": "PI2", "field": "count", "simulated": True
         }))
 
-    # PIR alarm kad prazno
+    # 6. DPIR2 - Alarm kad je prazno (Ostaje tvoje)
     if "DPIR2" in device_code and value and state["people_count"] == 0:
-        mqtt_client.publish(
-            "home/PI2/alarm_trigger",
-            json.dumps({"reason": f"{device_code} motion while empty", "value": True})
-        )
+        mqtt_client.publish("home/PI2/alarm_trigger",
+                            json.dumps({"reason": f"{device_code} motion while empty", "value": True}))
+        # Ovde može ostati auto-off jer je pokret trenutan
         threading.Timer(5, lambda: mqtt_client.publish(
-            "home/PI2/alarm_trigger",
-            json.dumps({"reason": f"{device_code} alarm auto off", "value": False})
+            "home/PI2/alarm_trigger", json.dumps({"reason": f"{device_code} motion while empty", "value": False})
         )).start()
 
-    #DHT3
+    # 7. DHT3 (Ostaje tvoje)
     if device_code == "DHT3":
-        mqtt_client.publish(
-            "home/PI2/dht3",
-            json.dumps({
-                "temperature": value.get("temperature"),
-                "humidity": value.get("humidity"),
-                "pi": "PI2"
-            })
-        )
+        mqtt_client.publish("home/PI2/dht3", json.dumps({
+            "temperature": value.get("temperature"),
+            "humidity": value.get("humidity"), "pi": "PI2"
+        }))
 
     # 4SD Timer display
     if device_code == "4SD":

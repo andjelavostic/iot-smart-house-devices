@@ -15,7 +15,7 @@ except ImportError as e:
     LCD_model = None
 
 
-def run_lcd_real(sensor_code, delay, on_value, stop_event, settings=None):
+def run_lcd_real(sensor_code, on_value, stop_event, settings=None):
     """
     Runner za pravi LCD na Raspberry Pi.
     settings može da sadrži:
@@ -46,7 +46,7 @@ def run_lcd_real(sensor_code, delay, on_value, stop_event, settings=None):
             if on_value:
                 # za LCD on_value možemo obavestiti da je prikazano
                 on_value(sensor_code, settings, settings.get("message") if settings else msg)
-            time.sleep(delay)
+            time.sleep(0.5)
 
     finally:
         lcd.clear()
