@@ -5,6 +5,7 @@ except ImportError:
 import time
 
 def run_buzzer_real(actuator_code, stop_event, settings, on_state_change):
+    GPIO.setmode(GPIO.BCM)
     pin = settings['pin']
     GPIO.setup(pin, GPIO.OUT)
     

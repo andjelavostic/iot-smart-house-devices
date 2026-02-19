@@ -10,6 +10,7 @@ def run_button_real(sensor_code,
     on_state_change,
     stop_event,
     settings):
+    GPIO.setmode(GPIO.BCM)
     pin = settings['pin']
     GPIO.setup(pin, GPIO.IN, pull_up_down=GPIO.PUD_UP)
     

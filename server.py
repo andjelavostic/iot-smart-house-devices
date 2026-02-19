@@ -7,7 +7,7 @@ from influxdb_client import InfluxDBClient, Point
 from influxdb_client.client.write_api import SYNCHRONOUS
 
 app = Flask(__name__)
-socketio = SocketIO(app, cors_allowed_origins="*")
+socketio = SocketIO(app, cors_allowed_origins="*",async_mode="threading")
 
 # INFLUXDB SETUP
 #Andjela, ne brisi moj token samo zakomentarisi

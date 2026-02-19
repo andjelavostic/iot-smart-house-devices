@@ -43,6 +43,7 @@ import time
 """
 
 def run_membrane_real(sensor_code, delay, on_value, stop_event, settings):
+    GPIO.setmode(GPIO.BCM)
     ROW_PINS = settings['rows']    
     COL_PINS = settings['cols']    
     

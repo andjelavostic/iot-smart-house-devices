@@ -5,6 +5,7 @@ except ImportError:
 import time
 
 def run_pir_real(sensor_code,delay,on_state_change, stop_event,settings):
+    GPIO.setmode(GPIO.BCM)
     pin = settings['pin']
     GPIO.setup(pin, GPIO.IN)
 

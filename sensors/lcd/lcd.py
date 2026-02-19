@@ -23,7 +23,7 @@ def run_lcd_real(sensor_code, on_value, stop_event, settings=None):
         - backlight: True/False
         - cols, lines: dimenzije (default 16x2)
     """
-
+    GPIO.setmode(GPIO.BCM)
     cols = settings.get("cols", 16) if settings else 16
     lines = settings.get("lines", 2) if settings else 2
     msg = settings.get("message", "Hello LCD") if settings else "Hello LCD"
