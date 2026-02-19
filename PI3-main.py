@@ -178,8 +178,9 @@ def main():
     # --- SENSORS (IR, DPIR, DHT) ---
     for code, cfg in settings.get("sensors", {}).items():
         entry = SENSOR_REGISTRY[cfg["type"]]
+        runner = entry["sim"] if cfg.get("simulated", True) else entry["true"]
         cb = "on_value" if cfg["type"] in ["dht", "ir"] else "on_state_change"
-        threading.Thread(target=entry["sim"], kwargs={
+        threading.Thread(target=runner, kwargs={
             "sensor_code": code, "delay": cfg.get("delay", 5), # Povećaj delay za IR!
             "stop_event": stop_event, "settings": cfg, cb: on_event
         }, daemon=True).start()
@@ -187,7 +188,8 @@ def main():
     # --- ACTUATORS (LCD, RGB) ---
     for code, cfg in settings.get("actuators", {}).items():
         entry = ACTUATOR_REGISTRY[cfg["type"]]
-        threading.Thread(target=entry["sim"], kwargs={
+        runner = entry["sim"] if cfg.get("simulated", True) else entry["true"]
+        threading.Thread(target=runner, kwargs={
             "actuator_code" if cfg["type"]=="lcd" else "actuator_code": code,
             "stop_event": stop_event, "settings": cfg, "on_state_change": on_event
         }, daemon=True).start()

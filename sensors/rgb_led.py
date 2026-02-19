@@ -14,32 +14,33 @@ def run_rgb_real(actuator_code, stop_event, settings=None, on_state_change=None)
     green_pin = settings.get("green_pin")
     blue_pin = settings.get("blue_pin")
 
-    if not all([red_pin, green_pin, blue_pin]):
-        print(f"[{actuator_code}] ERROR: Nedostaju pinovi")
-        return
-
-    GPIO.setwarnings(False)
     GPIO.setmode(GPIO.BCM)
-    GPIO.setup(red_pin, GPIO.OUT)
-    GPIO.setup(green_pin, GPIO.OUT)
-    GPIO.setup(blue_pin, GPIO.OUT)
+    GPIO.setup([red_pin, green_pin, blue_pin], GPIO.OUT)
 
-    def set_color(r, g, b):
+    last_color = [None, None, None] # Za praćenje promene
+
+    def set_hardware_color(color):
+        r, g, b = color
         GPIO.output(red_pin, GPIO.HIGH if r else GPIO.LOW)
         GPIO.output(green_pin, GPIO.HIGH if g else GPIO.LOW)
         GPIO.output(blue_pin, GPIO.HIGH if b else GPIO.LOW)
-        if on_state_change:
-            on_state_change(actuator_code, settings, [r,g,b])  # LISTA
 
-    print(f"[{actuator_code}] RGB REAL started (R={red_pin}, G={green_pin}, B={blue_pin})")
+    print(f"[{actuator_code}] RGB REAL started")
 
     try:
         while not stop_event.is_set():
-            color = settings.get("color", [0,0,0])
-            set_color(*color)
-            sleep(0.05)
+            # Uzmi boju koju je process_logic upisao u settings
+            current_color = settings.get("color", [0, 0, 0])
+            
+            # Postavi na pinove samo ako se boja razlikuje od prethodne
+            if current_color != last_color:
+                set_hardware_color(current_color)
+                last_color = current_color
+                
+                # Opciono: javi main-u da je hardver uspešno postavljen
+                if on_state_change:
+                    on_state_change(actuator_code, settings, current_color)
+            
+            sleep(0.5) # 0.1s je sasvim dovoljno za hardver
     finally:
         GPIO.cleanup([red_pin, green_pin, blue_pin])
-        print(f"[{actuator_code}] RGB REAL stopped")
-
-
