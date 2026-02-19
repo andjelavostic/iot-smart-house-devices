@@ -152,7 +152,7 @@ def lcd_rotation():
         }))
         
         idx += 1
-        time.sleep(4)
+        time.sleep(2)
 
 # ================= PUBLISHER & MAIN =================
 

@@ -46,7 +46,7 @@ def run_lcd_real(sensor_code, on_value, stop_event, settings=None):
             if on_value:
                 # za LCD on_value možemo obavestiti da je prikazano
                 on_value(sensor_code, settings, settings.get("message") if settings else msg)
-            time.sleep(0.5)
+            time.sleep(1)
 
     finally:
         lcd.clear()
