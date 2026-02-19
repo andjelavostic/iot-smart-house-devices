@@ -21,37 +21,35 @@ data_batch = []
 
 def process_logic(device_code, value, settings_cfg):
     global state
-    
-    # Ako je vrednost došla kao rečnik (sa MQTT-a ili simulatora), uzmi samo string komandu
     command = value
-    if isinstance(value, dict):
-        command = value.get("value", "")
+    if isinstance(value, dict): command = value.get("value", "")
 
-    # --- RGB LOGIKA ---
     if device_code == "IR" or device_code == "BRGB":
         if command == "POWER":
             state["rgb_on"] = not state["rgb_on"]
-        if command in ["COLOR_RED"]: # Dodaj nazive tvojih dugmića
+        elif command == "COLOR_RED":
+            state["rgb_on"] = True
             state["rgb_color"] = [1, 0, 0]
-        elif command in ["COLOR_BLUE"]:
+        elif command == "COLOR_BLUE":
+            state["rgb_on"] = True
             state["rgb_color"] = [0, 0, 1]
-        elif command in ["COLOR_GREEN"]:
+        elif command == "COLOR_GREEN":
+            state["rgb_on"] = True
             state["rgb_color"] = [0, 1, 0]
-        elif command in ["COLOR_PURPLE"]:
+        elif command == "COLOR_PURPLE":
+            state["rgb_on"] = True
             state["rgb_color"] = [1, 0, 1]
         
-        
         final_color = state["rgb_color"] if state["rgb_on"] else [0, 0, 0]
-        # KLJUČNA IZMENA: Nađi RGB u settings i promeni mu boju
+        
+        # Ažuriraj settings za simulator
         for code, cfg in settings.get("actuators", {}).items():
             if cfg["type"] == "rgb_led":
-                cfg["color"] = final_color  # Sada će simulator u sledećoj iteraciji videti ovo!
+                cfg["color"] = final_color
         
-        # Obaveštavamo Dashboard (JS traži data.device === "BRGB" i data.value kao niz)
+        # Javi frontu nazad da promeni kvadratić
         mqtt_client.publish("home/PI3/rgb", json.dumps({
-            "pi": "PI3", 
-            "device": "BRGB", 
-            "value": final_color
+            "pi": "PI3", "device": "BRGB", "value": final_color
         }))
         # --- PEOPLE COUNT ---
         if device_code == "DPIR3" and value == True:
@@ -94,27 +92,48 @@ def on_event(device_code, settings_cfg, value):
     # Odmah pošalji na specifičan topic za front da IR ne bi kasnio
     mqtt_client.publish(settings_cfg.get("topic"), json.dumps(data))
 # ================= MQTT CALLBACKS =================
-
 def on_message(client, userdata, msg):
     try:
         payload = json.loads(msg.payload.decode())
         topic = msg.topic
         
-        # Ažuriranje LCD simulatora direktno!
+        # --- 1. KOMANDE SA DASHBOARDA (Web tasteri) ---
+        if topic.startswith("home/commands/PI3"):
+            device = payload.get("device")
+            # Izvlačimo vrednost (za RGB to može biti 0/1 ili boja)
+            val = payload.get("value")
+            
+            # Mapiranje boja sa weba u komande koje process_logic razume
+            if device == "BRGB":
+                color_list = payload.get("color")
+                if val == 0:
+                    command = "POWER_OFF"
+                elif color_list == [1, 0, 0]:
+                    command = "COLOR_RED"
+                elif color_list == [0, 0, 1]:
+                    command = "COLOR_BLUE"
+                else:
+                    command = "POWER" # ili neka default vrednost
+                
+                # Pozivamo logiku da ažurira state i settings
+                process_logic(device, command, None)
+            return
+
+        # --- 2. AŽURIRANJE LCD-a ---
         if topic == "home/PI3/lcd":
-            # Menjamo poruku u settings-u koji simulator čita
             for code, cfg in settings.get("actuators", {}).items():
                 if cfg["type"] == "lcd":
                     cfg["message"] = payload.get("value", "---")
             return
 
+        # --- 3. DHT PODACI (Sinhronizacija za LCD rotaciju) ---
         if topic == "home/PI2/dht3":
             state["dht"]["DHT3"] = payload
             return
 
-        device = topic.split("/")[-1].upper()
-        if device in ["DHT1", "DHT2"]:
-            state["dht"][device] = payload
+        device_name = topic.split("/")[-1].upper()
+        if device_name in ["DHT1", "DHT2"]:
+            state["dht"][device_name] = payload
 
     except Exception as e:
         print(f"Error on_message: {e}")

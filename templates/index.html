@@ -146,6 +146,8 @@
                 <h3>Kontrola RGB (PI3)</h3>
                 <button onclick="socket.emit('command', {pi: 'PI3', device: 'BRGB', value: 1, color: [1,0,0]})">Crvena</button>
                 <button onclick="socket.emit('command', {pi: 'PI3', device: 'BRGB', value: 1, color: [0,0,1]})">Plava</button>
+                <button onclick="socket.emit('command', {pi: 'PI3', device: 'BRGB', value: 1, color: [0,1,0]})">Zelena</button>
+                <button onclick="socket.emit('command', {pi: 'PI3', device: 'BRGB', value: 1, color: [1,0,1]})">Ljubicasta</button>
                 <button onclick="socket.emit('command', {pi: 'PI3', device: 'BRGB', value: 0})">Ugasi</button>
             </div>
         </div>
