@@ -32,7 +32,7 @@ from simulators.gyroscope_sim import gyro_simulator
 from simulators.dht_sim import dht_simulator
 from simulators._4sd_sim import run_4sd_simulator
 from sensors.gyro.gyro import run_gyro_real
-
+from simulators.ir_sim import ir_sim
 SENSOR_REGISTRY = {
     "button": {
         "true": run_button_real,
@@ -60,7 +60,7 @@ SENSOR_REGISTRY = {
     },
     "ir":{
         "true":run_ir_real,
-        "sim":gyro_simulator
+        "sim":ir_sim
     }
 }
 ACTUATOR_REGISTRY = {

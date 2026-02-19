@@ -7,7 +7,7 @@ def ir_sim(sensor_code,delay,on_value, stop_event, settings=None):
     Generiše pritiske dugmadi iz button_map.
     """
     button_map = settings.get("button_map", {}) if settings else {}
-    buttons = list(button_map.values()) if button_map else ["POWER", "COLOR_UP", "COLOR_DOWN"]
+    buttons = list(button_map.values()) if button_map else ["POWER", "COLOR_BLUE", "COLOR_RED","COLOR_PURPLE","COLOR_GREEN"]
 
     print(f"[{sensor_code}] IR SIM started")
     try:

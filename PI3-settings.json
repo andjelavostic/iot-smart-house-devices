@@ -30,17 +30,17 @@
     "IR": {
         "type": "ir",
         "simulated": true,
-        "delay": 1,
+        "delay": 5,
         "pin": 17,
         "field_name": "button",
         "topic": "home/PI3/ir1",
         "description": "Living Room IR Sensor",
         "button_map": {
               "0x300ff02fd": "POWER", 
-              "0x300ff629d": "COLOR_UP",
-              "0x300ffa857": "COLOR_DOWN",
-              "0x300ff22dd": "BRIGHT_DOWN",
-              "0x300ffc23d": "BRIGHT_UP"
+              "0x300ff629d": "COLOR_BLUE",
+              "0x300ffa857": "COLOR_RED",
+              "0x300ff22dd": "COLOR_PURPLE",
+              "0x300ffc23d": "COLOR_GREEN"
         }
     },
     "DPIR3": {

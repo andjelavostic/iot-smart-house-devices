@@ -10,7 +10,7 @@ mqtt_config = settings.get("mqtt", {})
 mqtt_client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION1)
 
 state = {
-    "rgb_on": False,
+    "rgb_on": True,
     "rgb_color": [0, 0, 0],
     "dht": {"DHT1": None, "DHT2": None, "DHT3": None},
     "people_count": 0 
@@ -19,58 +19,80 @@ state = {
 batch_lock = threading.Lock()
 data_batch = []
 
-# ================= LOGIKA =================
-
 def process_logic(device_code, value, settings_cfg):
     global state
     
+    # Ako je vrednost došla kao rečnik (sa MQTT-a ili simulatora), uzmi samo string komandu
+    command = value
+    if isinstance(value, dict):
+        command = value.get("value", "")
+
     # --- RGB LOGIKA ---
     if device_code == "IR" or device_code == "BRGB":
-        command = value
-        if isinstance(value, dict): command = value.get("value", "")
-
         if command == "POWER":
             state["rgb_on"] = not state["rgb_on"]
-        elif command in ["COLOR_UP", "RED"]:
-            state["rgb_color"] = [1, 0, 0] # Slanje [1,0,0] jer JS to očekuje
-        elif command in ["COLOR_DOWN", "BLUE"]:
+        if command in ["COLOR_RED"]: # Dodaj nazive tvojih dugmića
+            state["rgb_color"] = [1, 0, 0]
+        elif command in ["COLOR_BLUE"]:
             state["rgb_color"] = [0, 0, 1]
+        elif command in ["COLOR_GREEN"]:
+            state["rgb_color"] = [0, 1, 0]
+        elif command in ["COLOR_PURPLE"]:
+            state["rgb_color"] = [1, 0, 1]
         
-        final_color = state["rgb_color"] if state["rgb_on"] else [0,0,0]
-        # Obaveštavamo Dashboard o promeni boje
-        mqtt_client.publish("home/PI3/rgb", json.dumps({"value": final_color, "pi": "PI3", "device": "BRGB"}))
-
-    # --- PEOPLE COUNT ---
-    if device_code == "DPIR3" and value == True:
-        state["people_count"] += 1
-        # BITNO: Šaljemo measurement "people" da bi Dashboard prepoznao!
-        mqtt_client.publish("home/PI3/people_count", json.dumps({
-            "measurement": "people", 
-            "value": state["people_count"], 
-            "device": "SYSTEM", 
-            "pi": "PI3"
+        
+        final_color = state["rgb_color"] if state["rgb_on"] else [0, 0, 0]
+        # KLJUČNA IZMENA: Nađi RGB u settings i promeni mu boju
+        for code, cfg in settings.get("actuators", {}).items():
+            if cfg["type"] == "rgb_led":
+                cfg["color"] = final_color  # Sada će simulator u sledećoj iteraciji videti ovo!
+        
+        # Obaveštavamo Dashboard (JS traži data.device === "BRGB" i data.value kao niz)
+        mqtt_client.publish("home/PI3/rgb", json.dumps({
+            "pi": "PI3", 
+            "device": "BRGB", 
+            "value": final_color
         }))
+        # --- PEOPLE COUNT ---
+        if device_code == "DPIR3" and value == True:
+            state["people_count"] += 1
+            # BITNO: Šaljemo measurement "people" da bi Dashboard prepoznao!
+            mqtt_client.publish("home/PI3/people_count", json.dumps({
+                "measurement": "people", 
+                "value": state["people_count"], 
+                "device": "SYSTEM", 
+                "pi": "PI3"
+            }))
+
 
 # ================= EVENT HANDLER =================
 
 def on_event(device_code, settings_cfg, value):
-    # Ignorišemo LCD feedback da ne bismo upali u beskonačnu petlju
     if device_code == "LCD": return 
 
-    process_logic(device_code, value, settings_cfg)
+    # BITNO: Ako je IR, 'value' je često string. Ako je DHT, 'value' je rečnik.
+    # Za Dashboard IR ispis, moramo poslati čistu komandu.
+    clean_value = value
+    if isinstance(value, dict) and "value" in value:
+        clean_value = value["value"]
 
+    process_logic(device_code, clean_value, settings_cfg)
+
+    # Ovo ide u bazu/publisher
     data = {
         "measurement": "iot_devices",
         "device": device_code,
         "pi": "PI3",
         "field": settings_cfg.get("field_name", "value"),
-        "value": value,
+        "value": clean_value, # Šaljemo čistu vrednost (npr. "POWER" umesto {} )
         "topic": settings_cfg.get("topic", "unknown")
     }
 
     with batch_lock:
         data_batch.append(data)
-
+    
+    # Odmah pošalji na specifičan topic za front da IR ne bi kasnio
+    mqtt_client.publish(settings_cfg.get("topic"), json.dumps(data))
 # ================= MQTT CALLBACKS =================
 
 def on_message(client, userdata, msg):
