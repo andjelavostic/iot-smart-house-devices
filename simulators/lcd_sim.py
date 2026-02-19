@@ -1,7 +1,7 @@
 # lcd_sim.py
 import time
 
-def lcd_sim(sensor_code, on_value, stop_event, settings=None):
+def lcd_sim(actuator_code, stop_event, settings=None, on_state_change=None):
     """
     Simulacija LCD-a.
     Ispisuje poruku na konzolu.
@@ -12,7 +12,7 @@ def lcd_sim(sensor_code, on_value, stop_event, settings=None):
     msg = settings.get("message", "Hello LCD") if settings else "Hello LCD"
     backlight = settings.get("backlight", True) if settings else True
 
-    print(f"[{sensor_code}] LCD SIM started. Backlight: {backlight}")
+    print(f"[{actuator_code}] LCD SIM started. Backlight: {backlight}")
     print("-" * (cols))
     print(msg)
     print("-" * (cols))
@@ -21,15 +21,15 @@ def lcd_sim(sensor_code, on_value, stop_event, settings=None):
         while not stop_event.is_set():
             if settings and "message" in settings:
                 msg = settings["message"]
-                print(f"[{sensor_code}] LCD SIM updated message:")
+                print(f"[{actuator_code}] LCD SIM updated message:")
                 print("-" * cols)
                 print(msg)
                 print("-" * cols)
 
-            if on_value:
-                on_value(sensor_code, settings, msg)
+            if on_state_change:
+                on_state_change(actuator_code, settings, msg)
 
-            time.sleep(0.5)
+            time.sleep(1)
 
     finally:
-        print(f"[{sensor_code}] LCD SIM stopped")
+        print(f"[{actuator_code}] LCD SIM stopped")

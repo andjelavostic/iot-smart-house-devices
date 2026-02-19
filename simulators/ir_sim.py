@@ -1,7 +1,7 @@
 import time
 import random
 
-def ir_sim(sensor_code, on_value, stop_event, settings=None):
+def ir_sim(sensor_code,delay,on_value, stop_event, settings=None):
     """
     Simulacija IR senzora.
     Generiše pritiske dugmadi iz button_map.
@@ -16,7 +16,7 @@ def ir_sim(sensor_code, on_value, stop_event, settings=None):
             if on_value:
                 on_value(sensor_code, settings, pressed)
             print(f"[{sensor_code}] Simulated button: {pressed}")
-            time.sleep(0.5)
+            time.sleep(delay)
     finally:
         print(f"[{sensor_code}] IR SIM stopped")
 
