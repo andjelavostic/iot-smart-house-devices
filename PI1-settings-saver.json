@@ -24,7 +24,7 @@
       "name": "DPIR1",
       "type": "pir",
       "simulated": true,
-      "delay": 5,
+      "delay": 7,
       "pin": 18,
       "field_name": "motion",
       "topic": "home/PI1/dpir1",

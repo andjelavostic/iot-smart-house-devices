@@ -21,7 +21,7 @@
     "DPIR2": {
       "type": "pir",
       "simulated": true,
-      "delay": 5,
+      "delay": 7,
       "pin": 6,
       "field_name": "motion",
       "topic": "home/PI2/dpir2",
@@ -30,7 +30,7 @@
     "DUS2": {
       "type": "ultrasonic",
       "simulated": true,
-      "delay": 7,
+      "delay": 5,
       "trig_pin": 12,
       "echo_pin": 13,
       "field_name": "distance",
@@ -40,7 +40,7 @@
     "DHT3": {
       "type": "dht",
       "simulated": true,
-      "delay": 10,
+      "delay": 7,
       "pin": 16,
       "field_name": "temp_hum",
       "topic": "home/PI2/dht3",

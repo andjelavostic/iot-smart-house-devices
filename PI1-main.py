@@ -61,11 +61,11 @@ def on_message(client, userdata, msg):
             if state["system_armed"]:
                 activate_alarm("intrusion","PI2")
 
-        elif event == "door_stuck":
-            activate_alarm("door_stuck","PI2")
+        elif event == "door_stuck_pi2":
+            activate_alarm("door_stuck_pi2","PI2")
 
         elif event == "door_closed":
-            if state["alarm_reason"] == "door_stuck":
+            if state["alarm_reason"] == "door_stuck_pi2":
                 deactivate_alarm("DS2 vrata zatvorena","PI2")
         return
     # --- GSG EVENT ---
@@ -90,7 +90,7 @@ def on_message(client, userdata, msg):
 def activate_alarm(reason,device):
     with alarm_lock:
         current_reason = state.get("alarm_reason")
-        if current_reason in ["intrusion", "motion"] and reason == "door_stuck":
+        if current_reason in ["intrusion", "motion"] and (reason == "door_stuck" or reason=="door_stuck_pi2"):
             return
             
         state["alarm_reason"] = reason

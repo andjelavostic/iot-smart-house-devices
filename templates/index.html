@@ -167,7 +167,7 @@
             }
         }
         function sendCommand(pi, device, value, color=null){
-            const payload = {value: value};
+            const payload = {pi: pi, device:device, value: value};
             if(color) payload.color = color;
             socket.emit("command", payload);
         }

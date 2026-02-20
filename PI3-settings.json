@@ -12,7 +12,7 @@
     "DHT1": {
       "type": "dht",
       "simulated": true,
-      "delay": 4,
+      "delay": 7,
       "pin": 16,
       "field_name": "temp_hum",
       "topic": "home/PI3/dht1",
@@ -21,7 +21,7 @@
     "DHT2": {
       "type": "dht",
       "simulated": true,
-      "delay": 4,
+      "delay": 7,
       "pin": 16,
       "field_name": "temp_hum",
       "topic": "home/PI3/dht2",
@@ -46,7 +46,7 @@
     "DPIR3": {
       "type": "pir",
       "simulated": true,
-      "delay": 3,
+      "delay": 7,
       "pin": 6,
       "field_name": "motion",
       "topic": "home/PI3/dpir3",

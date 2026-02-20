@@ -118,7 +118,7 @@ def process_logic(device_code, value, settings_cfg):
             # Provera za "zaboravljena vrata" (5s)
             def check_ds2_stuck():
                 if state.get("ds2_trigger_time") is not None:
-                    mqtt_client.publish("home/PI2/door_event",json.dumps({"event": "door_stuck"}))
+                    mqtt_client.publish("home/PI2/door_event",json.dumps({"event": "door_stuck_pi2"}))
             threading.Timer(5.0, check_ds2_stuck).start()
         else:
             state["ds2_trigger_time"] = None
@@ -151,9 +151,9 @@ def process_logic(device_code, value, settings_cfg):
         else:
             direction = "exit"
             state["people_count"] = max(0, state["people_count"] - 1)
-
-        mqtt_client.publish("home/PI2/person_event", json.dumps({
-            "direction": direction
+            
+        mqtt_client.publish("home/PI2/person_event", json.dumps({"measurement": "people", "value": state["people_count"], 
+            "device": "SYSTEM", "pi": "PI2", "field": "count","direction":"direction"
         }))
 
     # 6. DPIR2 - Alarm kad je prazno (Ostaje tvoje)
