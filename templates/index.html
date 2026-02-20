@@ -361,12 +361,25 @@
             // ================= PI3 =================
             if (data.pi === "PI3") {
 
-                // DHT1 i DHT2 (Šalju JSON sa temp i hum)
-                if(data.device === "DHT1")
-                    document.getElementById('dht1-val').innerText = `T: ${data.value.temperature}°C | H: ${data.value.humidity}%`;
-                
-                if(data.device === "DHT2")
-                    document.getElementById('dht2-val').innerText = `T: ${data.value.temperature}°C | H: ${data.value.humidity}%`;
+                // DHT1 i DHT2
+                if (data.device === "DHT1" || data.device === "DHT2") {
+                    const el = document.getElementById(data.device.toLowerCase() + '-val');
+
+                    // Preuzimamo prethodno prikazane vrednosti
+                    let currentText = el.innerText || "";
+                    let temp = currentText.match(/T: ([0-9.\-]+)/);
+                    let hum = currentText.match(/H: ([0-9.\-]+)/);
+
+                    // Ako nema, postavimo default
+                    temp = temp ? temp[1] : "--";
+                    hum = hum ? hum[1] : "--";
+
+                    // Ažuriramo na osnovu field
+                    if (data.field === "temperature") temp = data.value;
+                    if (data.field === "humidity") hum = data.value;
+
+                    el.innerText = `T: ${temp}°C | H: ${hum}%`;
+                }
 
                 // RGB LED
                 if(data.device === "BRGB") {

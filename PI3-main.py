@@ -160,7 +160,16 @@ def on_message(client, userdata, msg):
 
         device_name = topic.split("/")[-1].upper()
         if device_name in ["DHT1", "DHT2"]:
-            state["dht"][device_name] = payload
+            current = state["dht"].get(device_name) or {"temperature": "--", "humidity": "--"}
+            field = payload.get("field")
+            val = payload.get("value", "--")
+
+            if field == "temperature":
+                current["temperature"] = val
+            elif field == "humidity":
+                current["humidity"] = val
+
+            state["dht"][device_name] = current
 
     except Exception as e:
         print(f"Error on_message: {e}")
@@ -182,8 +191,8 @@ def lcd_rotation():
                 # Proveravamo da li je simulator spakovao u "value" ključ
                 inner = raw_data.get("value", raw_data)
                 if isinstance(inner, dict):
-                    temp = inner.get('temperature') or inner.get('temp', '--')
-                    hum = inner.get('humidity') or inner.get('hum', '--')
+                    temp = inner.get('temperature','--') or inner.get('temp', '--')
+                    hum = inner.get('humidity','--') or inner.get('hum', '--')
             
             msg = f"{key}:T={temp}C H={hum}%"
         else:
