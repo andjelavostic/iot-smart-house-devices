@@ -22,7 +22,8 @@ data_batch = []
 def process_logic(device_code, value, settings_cfg):
     global state
     command = value
-    if isinstance(value, dict): command = value.get("value", "")
+    if isinstance(value, dict):
+        command = value.get("value", "")
 
     if device_code == "IR" or device_code == "BRGB":
         if command == "POWER":
@@ -59,36 +60,52 @@ def process_logic(device_code, value, settings_cfg):
                     "value": True
                 }))
 
-
-
-# ================= EVENT HANDLER =================
-
 def on_event(device_code, settings_cfg, value):
-    if device_code == "LCD": return 
+    if device_code == "LCD":
+        return
 
-    # BITNO: Ako je IR, 'value' je često string. Ako je DHT, 'value' je rečnik.
-    # Za Dashboard IR ispis, moramo poslati čistu komandu.
+    process_logic(device_code, value, settings_cfg)
+
+    topic = settings_cfg.get("topic", "unknown")
+
+    # da za dht bude value dict zbog grafane
+    if isinstance(value, dict) and device_code in ["DHT1", "DHT2"]:
+        
+        # temp
+        mqtt_client.publish(topic, json.dumps({
+            "measurement": "iot_devices",
+            "device": device_code,
+            "pi": "PI3",
+            "field": "temperature",
+            "value": value.get("temperature")
+        }))
+
+        # vlaga
+        mqtt_client.publish(topic, json.dumps({
+            "measurement": "iot_devices",
+            "device": device_code,
+            "pi": "PI3",
+            "field": "humidity",
+            "value": value.get("humidity")
+        }))
+
+        return
+
     clean_value = value
     if isinstance(value, dict) and "value" in value:
         clean_value = value["value"]
 
-    process_logic(device_code, clean_value, settings_cfg)
-
-    # Ovo ide u bazu/publisher
     data = {
         "measurement": "iot_devices",
         "device": device_code,
         "pi": "PI3",
         "field": settings_cfg.get("field_name", "value"),
-        "value": clean_value, # Šaljemo čistu vrednost (npr. "POWER" umesto {} )
-        "topic": settings_cfg.get("topic", "unknown")
+        "value": clean_value,
+        "topic": topic
     }
 
-    with batch_lock:
-        data_batch.append(data)
+    mqtt_client.publish(topic, json.dumps(data))
     
-    # Odmah pošalji na specifičan topic za front da IR ne bi kasnio
-    mqtt_client.publish(settings_cfg.get("topic"), json.dumps(data))
 # ================= MQTT CALLBACKS =================
 def on_message(client, userdata, msg):
     global state
@@ -229,7 +246,8 @@ def main():
         }, daemon=True).start()
 
     try:
-        while True: time.sleep(1)
+        while True:
+            time.sleep(1)
     except KeyboardInterrupt:
         stop_event.set()
 

@@ -1,0 +1,186 @@
+QUERIES = [
+    {"pi": "PI1", "device": "DPIR1", "field": "motion", "flux": '''
+from(bucket: "iot_bucket")
+  |> range(start: -1h)
+  |> filter(fn: (r) => r["_measurement"] == "iot_devices")
+  |> filter(fn: (r) => r["device"] == "DPIR1")
+  |> filter(fn: (r) => exists r._value)
+'''},
+
+    {"pi": "PI1", "device": "DS1", "field": "status", "flux": '''
+from(bucket: "iot_bucket")
+  |> range(start: -1h)
+  |> filter(fn: (r) => r["_measurement"] == "iot_devices")
+  |> filter(fn: (r) => r["device"] == "DS1")
+  |> filter(fn: (r) => exists r._value)
+'''},
+
+    {"pi": "PI1", "device": "DUS1", "field": "distance", "flux": '''
+from(bucket: "iot_bucket")
+  |> range(start: -1h)
+  |> filter(fn: (r) => r["_measurement"] == "iot_devices")
+  |> filter(fn: (r) => r["device"] == "DUS1")
+  |> filter(fn: (r) => exists r._value)
+'''},
+
+    {"pi": "PI1", "device": "DMS", "field": "membrane", "flux": '''
+from(bucket: "iot_bucket")
+  |> range(start: -1h)
+  |> filter(fn: (r) => r["_measurement"] == "iot_devices")
+  |> filter(fn: (r) => r["device"] == "DMS")
+  |> filter(fn: (r) => exists r._value)
+'''},
+
+    {"pi": "PI1", "device": "DL", "field": "state", "flux": '''
+from(bucket:"iot_bucket")
+  |> range(start: -1h)
+  |> filter(fn: (r) => r["_measurement"] == "iot_devices")
+  |> filter(fn: (r) => r["device"] == "DL")
+  |> filter(fn: (r) => r["pi"] == "PI1")
+  |> filter(fn: (r) => r["_field"] == "state")
+'''},
+
+    {"pi": "PI1", "device": "DB", "field": "alarm", "flux": '''
+from(bucket:"iot_bucket")
+  |> range(start: -1h)
+  |> filter(fn: (r) => r["_measurement"] == "alarm" or r["_measurement"] == "iot_devices")
+  |> filter(fn: (r) => r["device"] == "DB")
+  |> filter(fn: (r) => r["pi"] == "PI1")
+  |> filter(fn: (r) => r["_field"] == "state" or r["_field"] == "active")
+'''},
+
+# --- PI2 ---
+    {"pi": "PI2", "device": "GSG", "field": "gyroscope", "flux": '''
+from(bucket: "iot_bucket")
+  |> range(start: -1h)
+  |> filter(fn: (r) => r._measurement == "iot_devices")
+  |> filter(fn: (r) => r.device == "GSG")
+  |> sort(columns: ["_time"])
+'''},
+
+    {"pi": "PI2", "device": "DUS2", "field": "distance", "flux": '''
+from(bucket: "iot_bucket")
+  |> range(start: -24h)
+  |> filter(fn: (r) => r["_measurement"] == "iot_devices")
+  |> filter(fn: (r) => r["pi"] == "PI2")
+  |> filter(fn: (r) => r["device"] == "DUS2")
+  |> filter(fn: (r) => r["_field"] == "distance")
+  |> aggregateWindow(every: 1m, fn: mean, createEmpty: false)
+'''},
+
+    {"pi": "PI2", "device": "DS2", "field": "state", "flux": '''
+from(bucket: "iot_bucket")
+  |> range(start: -24h)
+  |> filter(fn: (r) => r["_measurement"] == "iot_devices")
+  |> filter(fn: (r) => r["pi"] == "PI2")
+  |> filter(fn: (r) => r["device"] == "DS2")
+  |> filter(fn: (r) => r["_field"] == "status")
+'''},
+
+# --- PI3 DHT i RGB ---
+    {"pi": "PI3", "device": "DHT1", "field": "humidity", "flux": '''
+from(bucket: "iot_bucket")
+  |> range(start: -1h)
+  |> filter(fn: (r) =>
+    r._measurement == "iot_devices" and
+    r.pi == "PI3" and
+    r.device == "DHT1" and
+    r._field == "humidity"
+  )
+'''},
+
+    {"pi": "PI3", "device": "DHT2", "field": "temperature", "flux": '''
+from(bucket: "iot_bucket")
+  |> range(start: -1h)
+  |> filter(fn: (r) =>
+    r._measurement == "iot_devices" and
+    r.pi == "PI3" and
+    r.device == "DHT2" and
+    r._field == "temperature"
+  )
+'''},
+
+    {"pi": "PI3", "device": "DHT1", "field": "temperature", "flux": '''
+from(bucket: "iot_bucket")
+  |> range(start: -1h)
+  |> filter(fn: (r) =>
+    r._measurement == "iot_devices" and
+    r.pi == "PI3" and
+    r.device == "DHT1" and
+    r._field == "temperature"
+  )
+'''},
+
+    {"pi": "PI3", "device": "DPIR3", "field": "motion", "flux": '''
+from(bucket: "iot_bucket")
+  |> range(start: -6h)
+  |> filter(fn: (r) =>
+    r._measurement == "iot_devices" and
+    r.pi == "PI3" and
+    r.device == "DPIR3" and
+    r._field == "motion"
+  )
+'''},
+
+    {"pi": "PI3", "device": "DHT2", "field": "humidity", "flux": '''
+from(bucket: "iot_bucket")
+  |> range(start: -1h)
+  |> filter(fn: (r) =>
+    r._measurement == "iot_devices" and
+    r.pi == "PI3" and
+    r.device == "DHT2" and
+    r._field == "humidity"
+  )
+'''},
+
+    {"pi": "PI3", "device": "IR", "field": "button", "flux": '''
+from(bucket: "iot_bucket")
+  |> range(start: -6h)
+  |> filter(fn: (r) =>
+    r._measurement == "iot_devices" and
+    r.pi == "PI3" and
+    r.device == "IR" and
+    r._field == "button"
+  )
+'''},
+
+# --- PI3 RGB boje ---
+    {"pi": "PI3", "device": "BRGB_R", "field": "color_r", "flux": '''
+import "strings"
+from(bucket: "iot_bucket")
+  |> range(start: -1h)
+  |> filter(fn: (r) =>
+      r._measurement == "iot_devices" and
+      r.device == "BRGB" and
+      r.pi == "PI3" and
+      r._field == "color"
+  )
+  |> map(fn: (r) => ({ r with _value: float(strings.split(strings.trim(v: r._value, cutset:"[]"), t:",")[0]) }))
+'''},
+
+    {"pi": "PI3", "device": "BRGB_G", "field": "color_g", "flux": '''
+import "strings"
+from(bucket: "iot_bucket")
+  |> range(start: -1h)
+  |> filter(fn: (r) =>
+      r._measurement == "iot_devices" and
+      r.device == "BRGB" and
+      r.pi == "PI3" and
+      r._field == "color"
+  )
+  |> map(fn: (r) => ({ r with _value: float(strings.split(strings.trim(v: r._value, cutset:"[]"), t:",")[1]) }))
+'''},
+
+    {"pi": "PI3", "device": "BRGB_B", "field": "color_b", "flux": '''
+import "strings"
+from(bucket: "iot_bucket")
+  |> range(start: -1h)
+  |> filter(fn: (r) =>
+      r._measurement == "iot_devices" and
+      r.device == "BRGB" and
+      r.pi == "PI3" and
+      r._field == "color"
+  )
+  |> map(fn: (r) => ({ r with _value: float(strings.split(strings.trim(v: r._value, cutset:"[]"), t:",")[2]) }))
+'''}
+]
