@@ -30,8 +30,11 @@ alarm_lock = threading.Lock()
 # --- MQTT CALLBACKS ---
 def on_connect(client, userdata, flags, rc):
     client.subscribe("home/commands/PI1/#")
-    client.subscribe("home/PI2/alarm_trigger")
-    client.subscribe("home/PI3/alarm_trigger")
+    client.subscribe("home/PI2/person_event")
+    client.subscribe("home/PI2/door_event")
+    client.subscribe("home/PI2/gsg_event")
+    client.subscribe("home/PI2/motion_event")
+    client.subscribe("home/PI3/motion_event")
 
 def on_message(client, userdata, msg):
     global state
@@ -39,64 +42,75 @@ def on_message(client, userdata, msg):
     topic = msg.topic
     device_code = topic.split('/')[-1].upper()
 
-    # ... (ostatak on_message za ALARM i aktuatore ostaje isti) ...
+    # --- PERSON EVENT FROM PI2 ---
+    if msg.topic == "home/PI2/person_event":
+        direction = payload.get("direction")
 
-    if msg.topic in ["home/PI2/alarm_trigger", "home/PI3/alarm_trigger"]:
-        is_active = payload.get("value")
-        reason = payload.get("reason")
+        if direction == "enter":
+            state["people_count"] += 1
+        elif direction == "exit":
+            state["people_count"] = max(0, state["people_count"] - 1)
 
-        if is_active:
-            activate_alarm(reason)
-        else:
-            # DEFINIŠEMO ŠTA SME SAMO DA SE UGASI:
-            # Dodajemo razloge koji potiču od vrata (DS2)
-            # Razlozi koji sadrže "motion" ili "intrusion" se NE nalaze ovde
-            auto_deactivate_reasons = [
-                "DS2 open while empty", 
-                "DS2 open too long", 
-                "door_stuck",
-                "external" # zavisi kako si nazvao u simulatoru
-            ]
-
-            if state["alarm_active"] and state["alarm_reason"] == reason:
-                if reason in auto_deactivate_reasons:
-                    print(f"[INFO] Senzor ({reason}) je u redu. Gasim alarm.")
-                    deactivate_alarm()
-                else:
-                    # Ovo se dešava za PIR (motion) - on pošalje False, ali mi ignorišemo
-                    print(f"[SECURITY] Razlog {reason} zahteva PIN za gašenje. Ignorišem auto-off.")
+        print(f"[PEOPLE] Trenutno u objektu: {state['people_count']}")
         return
+    # --- DOOR EVENT FROM PI2 ---
+    if msg.topic == "home/PI2/door_event":
+        event = payload.get("event")
 
-    # 4. Aktuatori
+        if event == "door_open":
+            if state["system_armed"]:
+                activate_alarm("intrusion","PI2")
+
+        elif event == "door_stuck":
+            activate_alarm("door_stuck","PI2")
+
+        elif event == "door_closed":
+            if state["alarm_reason"] == "door_stuck":
+                deactivate_alarm("DS2 vrata zatvorena","PI2")
+        return
+    # --- GSG EVENT ---
+    if msg.topic == "home/PI2/gsg_event":
+        activate_alarm("gsg","PI2")
+        return
+    # --- MOTION FROM PI2 ---
+    if msg.topic == "home/PI2/motion_event":
+        if state["people_count"] == 0:
+            activate_alarm("motion","PI2")
+        return
+    # --- MOTION FROM PI3 ---
+    if msg.topic == "home/PI3/motion_event":
+        if state["people_count"] == 0:
+            activate_alarm("motion","PI3")
+        return
+    #Aktuatori
     if device_code in settings.get("actuators", {}):
         settings["actuators"][device_code]["state"] = bool(payload.get("value", False))
 
 # --- ALARM FUNCTIONS ---
-def activate_alarm(reason):
+def activate_alarm(reason,device):
     with alarm_lock:
-        # Prioritet: Ne dozvoli da "door_stuck" prepiše "intrusion" ili "motion"
         current_reason = state.get("alarm_reason")
         if current_reason in ["intrusion", "motion"] and reason == "door_stuck":
-            return # Ne smanjuj ozbiljnost alarma
+            return
             
         state["alarm_reason"] = reason
         if state["alarm_active"]:
             return
             
         state["alarm_active"] = True
-        print(f"[ALARM] AKTIVIRAN (Razlog: {reason})")
+        print(f"[ALARM] AKTIVIRAN (Razlog: {reason}, uredjaj {device})")
         mqtt_client.publish("home/commands/PI1/DB", json.dumps({"value": 1}))
         mqtt_client.publish("home/pi1/alarm", json.dumps({
             "measurement": "alarm", "device": "DB", "pi": "PI1", "field": "state", "value": 1, "simulated": True
         }))
 
-def deactivate_alarm():
+def deactivate_alarm(reason,device):
     with alarm_lock:
         if not state["alarm_active"]:
             return
         state["alarm_active"] = False
         state["alarm_reason"] = None
-        print("[ALARM] DEAKTIVIRAN")
+        print(f"[ALARM] DEAKTIVIRAN (Razlog: {reason}, uredjaj {device})")
         mqtt_client.publish("home/commands/PI1/DB", json.dumps({"value": 0}))
         mqtt_client.publish("home/pi1/alarm", json.dumps({
             "measurement": "alarm", "device": "DB", "pi": "PI1", "field": "state", "value": 0, "simulated": True
@@ -113,7 +127,7 @@ def process_logic(device_code, value):
         if value == state["correct_pin"]:
             # Ako je alarm aktivan ILI je sistem samo naoružan
             if state["alarm_active"] or state["system_armed"]:
-                deactivate_alarm() # Ovo briše state["alarm_reason"]
+                deactivate_alarm("PIN UNET","PI1") # Ovo briše state["alarm_reason"]
                 state["system_armed"] = False
                 print("[SYSTEM] Sve deaktivirano PIN-om.")
             else:
@@ -121,8 +135,8 @@ def process_logic(device_code, value):
                 print("[SYSTEM] Sistem će biti aktivan za 10s...")
                 threading.Timer(10, arm_system).start()
 
-    # 2. VRATA (DS1 i DS2)
-    if device_code in ["DS1", "DS2"]:
+    # 2. VRATA (DS1)
+    if device_code=="DS1":
         trigger_key = f"{device_code.lower()}_trigger_time"
         timer_key = f"{device_code.lower()}_timer"
 
@@ -131,14 +145,14 @@ def process_logic(device_code, value):
             
             # Ako je sistem naoružan -> PROVALA (intrusion) - Odmah i visoki prioritet
             if state["system_armed"]:
-                activate_alarm("intrusion")
+                activate_alarm("intrusion","PI1")
             
             # Tajmer za "zaboravljena vrata" (>5s)
             def door_timer_check(d_code, trig_k):
                 # Proveri da li su vrata još uvek otvorena
                 if state.get(trig_k) is not None:
                     # Pali alarm samo kao "door_stuck" ako već nije "intrusion"
-                    activate_alarm("door_stuck")
+                    activate_alarm("door_stuck","PI1")
             
             # Otkaži stari tajmer ako postoji i pokreni novi
             if state.get(timer_key):
@@ -158,7 +172,7 @@ def process_logic(device_code, value):
             # Ako je razlog 'motion' ili 'intrusion', zatvaranje vrata NE RADI NIŠTA.
             if state["alarm_active"] and state["alarm_reason"] == "door_stuck":
                 print(f"[INFO] {device_code} zatvoren, razlog je bio door_stuck, gasim alarm.")
-                deactivate_alarm()
+                deactivate_alarm("DS1 vrata zatvorena","PI1")
             else:
                 print(f"[INFO] {device_code} zatvoren, ali alarm ostaje jer je razlog: {state['alarm_reason']}")
 
@@ -178,11 +192,10 @@ def process_logic(device_code, value):
             "measurement": "people", "value": state["people_count"], "device": "SYSTEM", "pi": "PI1", "field": "count"
         }))
 
-    # 4. POKRET U PRAZNOM OBJEKTU (RPIR1, RPIR2, RPIR3)
-    if "RPIR" in device_code and value:
-        if state["system_armed"] and state["people_count"] == 0:
-            print(f"[ALARM] Pokret detektovan na {device_code} u praznom objektu!")
-            activate_alarm("motion")
+    # 4. POKRET U PRAZNOM OBJEKTU (DPIR1)
+    if device_code == "DPIR1" and value:
+        if state["people_count"] == 0:
+            activate_alarm("motion","PI1")
 
     # 5. SVETLO (DPIR1)
     if device_code == "DPIR1" and value:

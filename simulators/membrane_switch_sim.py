@@ -3,7 +3,7 @@ import random
 
 KEYS = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "*", "#", "A", "B", "C", "D"]
 
-def generate_values(correct_pin="1234", probability=0.2):
+def generate_values(correct_pin="1234", probability=0.7):
     while True:
         # 20% šanse da pošalje ispravan PIN
         if random.random() < probability:

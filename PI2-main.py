@@ -37,7 +37,7 @@ def on_message(client, userdata, msg):
     topic = msg.topic
     device_code = topic.split('/')[-1].upper()
 
-    # Sinhronizacija broja ljudi (Zahtjev 5)
+    # Sinhronizacija broja ljudi
     if "people_count" in topic:
         state["people_count"] = int(payload.get("value", 0))
         return
@@ -113,35 +113,27 @@ def process_logic(device_code, value, settings_cfg):
     if device_code == "DS2":
         if value:  # Vrata otvorena
             state["ds2_trigger_time"] = time.time()
-            if state["people_count"] == 0:
-                mqtt_client.publish("home/PI2/alarm_trigger",
-                                    json.dumps({"reason": "DS2 open while empty", "value": True}))
+            mqtt_client.publish("home/PI2/door_event",json.dumps({"event": "door_open"}))
             
             # Provera za "zaboravljena vrata" (5s)
             def check_ds2_stuck():
                 if state.get("ds2_trigger_time") is not None:
-                    mqtt_client.publish("home/PI2/alarm_trigger",
-                                        json.dumps({"reason": "DS2 open too long", "value": True}))
+                    mqtt_client.publish("home/PI2/door_event",json.dumps({"event": "door_stuck"}))
             threading.Timer(5.0, check_ds2_stuck).start()
         else:
-            # VRATA ZATVORENA - Ovde gasimo oba DS2 alarma
             state["ds2_trigger_time"] = None
-            mqtt_client.publish("home/PI2/alarm_trigger",
-                                json.dumps({"reason": "DS2 open while empty", "value": False}))
-            mqtt_client.publish("home/PI2/alarm_trigger",
-                                json.dumps({"reason": "DS2 open too long", "value": False}))
+            mqtt_client.publish("home/PI2/door_event",json.dumps({"event": "door_closed"}))
 
-    # 4. GSG - Žiroskop (Ostaje tvoje)
+    # 4. GSG - Žiroskop 
     if device_code == "GSG":
         accel = value.get("accel", [0,0,0])
         magnitude = math.sqrt(sum([x**2 for x in accel]))
         if magnitude > 3.5:
-            mqtt_client.publish("home/PI2/alarm_trigger",
-                                json.dumps({"reason": "GSG movement detected", "value": True}))
+            mqtt_client.publish("home/PI2/gsg_event",json.dumps({"reason": "GSG movement detected", "value": True}))
             # Ovde može ostati auto-off jer žiroskop nema "zatvoreno" stanje
-            threading.Timer(5, lambda: mqtt_client.publish(
-                "home/PI2/alarm_trigger", json.dumps({"reason": "GSG movement detected", "value": False})
-            )).start()
+            #threading.Timer(5, lambda: mqtt_client.publish(
+            #    "home/PI2/alarm_trigger", json.dumps({"reason": "GSG movement detected", "value": False})
+            #)).start()
 
     # 5. DUS2 / DPIR2 - Brojanje ljudi (Ostaje tvoje)
     if device_code == "DUS2":
@@ -152,24 +144,25 @@ def process_logic(device_code, value, settings_cfg):
     if device_code == "DPIR2" and value and len(state["last_distances"]) >= 3:
         first = state["last_distances"][0]
         last = state["last_distances"][-1]
+
         if last < first:
+            direction = "enter"
             state["people_count"] += 1
         else:
+            direction = "exit"
             state["people_count"] = max(0, state["people_count"] - 1)
 
-        mqtt_client.publish("home/pi2/people", json.dumps({
-            "measurement": "people", "value": state["people_count"],
-            "device": "SYSTEM", "pi": "PI2", "field": "count", "simulated": True
+        mqtt_client.publish("home/PI2/person_event", json.dumps({
+            "direction": direction
         }))
 
     # 6. DPIR2 - Alarm kad je prazno (Ostaje tvoje)
     if "DPIR2" in device_code and value and state["people_count"] == 0:
-        mqtt_client.publish("home/PI2/alarm_trigger",
-                            json.dumps({"reason": f"{device_code} motion while empty", "value": True}))
+        mqtt_client.publish("home/PI2/motion_event",json.dumps({"motion": True, "device": "DPIR2"}))
         # Ovde može ostati auto-off jer je pokret trenutan
-        threading.Timer(5, lambda: mqtt_client.publish(
-            "home/PI2/alarm_trigger", json.dumps({"reason": f"{device_code} motion while empty", "value": False})
-        )).start()
+        #threading.Timer(5, lambda: mqtt_client.publish(
+        #    "home/PI2/alarm_trigger", json.dumps({"reason": f"{device_code} motion while empty", "value": False})
+        #)).start()
 
     # 7. DHT3 (Ostaje tvoje)
     if device_code == "DHT3":
