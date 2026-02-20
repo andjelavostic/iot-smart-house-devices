@@ -168,30 +168,18 @@
     <div class="pi-panel" id="pi3-panel">
         <div class="pi-title">PI3 Status (Bedroom & Living Room)</div>
         <div class="grid">
-            <div class="card" id="card-DHT1">
-                <h3>DHT1 (Bedroom)</h3>
-                <p id="dht1-val">---</p>
-            </div>
-            <div class="card" id="card-DHT2">
-                <h3>DHT2 (Master Bed)</h3>
-                <p id="dht2-val">---</p>
+            <div class="card" id="card-DPIR3">
+                <h3>PIR (DPIR3)</h3>
+                <p id="dpir3-val">Mirno</p>
             </div>
             <div class="card" id="card-BRGB">
                 <h3>Bedroom RGB LED</h3>
                 <p id="rgb-val">Status: Off</p>
                 <div id="rgb-color-box" style="width: 50px; height: 20px; border: 1px solid white; margin-top: 5px;"></div>
             </div>
-            <div class="card" id="card-LCD">
-                <h3>LCD Display</h3>
-                <p id="lcd-val" style="background: #002200; color: #00FF00; padding: 5px; font-family: monospace; border: 2px solid #333;">---</p>
-            </div>
             <div class="card" id="card-IR">
                 <h3>IR Remote (Living Room)</h3>
                 <p id="ir-val">Poslednja komanda: ---</p>
-            </div>
-            <div class="card" id="card-DPIR3">
-                <h3>PIR (DPIR3)</h3>
-                <p id="dpir3-val">Mirno</p>
             </div>
             <div class="card">
                 <h3>Kontrola RGB (PI3)</h3>
@@ -200,6 +188,18 @@
                 <button onclick="sendCommand('PI3', 'BRGB', 1, [0,1,0])">Zelena</button>
                 <button onclick="sendCommand('PI3', 'BRGB', 1, [1,0,1])">Ljubicasta</button>
                 <button onclick="sendCommand('PI3', 'BRGB', 0)">Ugasi</button>
+            </div>
+            <div class="card" id="card-LCD">
+                <h3>LCD Display</h3>
+                <p id="lcd-val" style="background: #002200; color: #00FF00; padding: 5px; font-family: monospace; border: 2px solid #333;">---</p>
+            </div>
+            <div class="card" id="card-DHT1">
+                <h3>DHT1 (Bedroom)</h3>
+                <p id="dht1-val">---</p>
+            </div>
+            <div class="card" id="card-DHT2">
+                <h3>DHT2 (Master Bed)</h3>
+                <p id="dht2-val">---</p>
             </div>
         </div>
     </div>
