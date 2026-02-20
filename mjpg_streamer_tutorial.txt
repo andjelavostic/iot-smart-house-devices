@@ -1,0 +1,23 @@
+export http_proxy="http://proxy.uns.ac.rs:8080"
+export https_proxy="http://proxy.uns.ac.rs:8080"
+
+# Update system (skip)
+# sudo apt update
+# sudo apt upgrade -y
+
+# Try installing from apt first (skip)
+# sudo apt install -y mjpg-streamer
+# If this works, skip to the "Starting a stream" step.
+
+# Install dependencies for manual build (if needed)
+sudo apt install -y git cmake build-essential libjpeg-dev
+git clone https://github.com/jacksonliam/mjpg-streamer.git
+cd mjpg-streamer/mjpg-streamer-experimental
+make
+sudo make install
+
+# Starting a stream
+mjpg_streamer -i "input_uvc.so" -o "output_http.so -p 8080 -w /usr/local/share/mjpg-streamer/www"
+
+# Open stream in a browser
+http://<raspberry_pi_ip>:8080/?action=stream

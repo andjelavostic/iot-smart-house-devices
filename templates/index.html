@@ -11,6 +11,32 @@
 
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px; }
         .card { background: #333; padding: 15px; border-radius: 8px; border-left: 5px solid #4CAF50; }
+        .camera-card {
+            background: #333;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 5px solid #4CAF50;   /* druga boja da se razlikuje */
+            box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+        }
+
+        .camera-card h3 {
+            margin-bottom: 10px;
+            color: #fff;
+        }
+
+        .camera-wrapper {
+            width: 100%;
+            aspect-ratio: 16 / 9;   /* zadržava proporciju */
+            overflow: hidden;
+            border-radius: 6px;
+            background: #000;
+        }
+
+        .camera-wrapper img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;  /* popunjava prostor bez deformacije */
+        }
         .alarm-on { border-left-color: #f44336; animation: blink 1s infinite; }
         .led-on { border-left-color: #2196F3; }
         .buzzer-on { border-left-color: #FF9800; }
@@ -30,6 +56,12 @@
     <div class="pi-panel" id="pi1-panel">
         <div class="pi-title">PI1 Status</div>
         <div class="grid">
+            <div class="camera-card">
+                <h3>Kamera PI2</h3>
+                <div class="camera-wrapper">
+                    <img src="http://PI_IP:8080/?action=stream" alt="Kamera PI2">
+                </div>
+            </div>
             <div class="card" id="card-ALARM">
                 <h3>Sistem Alarm</h3>
                 <p id="alarm-status">Status: ---</p>
