@@ -37,16 +37,25 @@ def on_message(client, userdata, msg):
     topic = msg.topic
     device_code = topic.split('/')[-1].upper()
 
+    if "home/commands/PI2" in topic:
+            value = payload.get("value")
+            if device_code == "BTN_CONFIG":
+                state["timer_add_seconds"] = int(value)
+                print(f"[BTN] add {state['timer_add_seconds']}")
+                print(f"[TIMER CONFIG] Dugme sada dodaje {state['timer_add_seconds']} sekundi")
+                return
+
+            if device_code == "TIMERSET":
+                state["timer_value"] = int(value)
+                state["timer_running"] = True
+                state["timer_blink"] = False
+                print(f"[TIMERSET] value={value}")
+                publish_display(state["timer_value"])
+                return
+    
     # Sinhronizacija broja ljudi
     if "people_count" in topic:
         state["people_count"] = int(payload.get("value", 0))
-        return
-
-    # Komande sa Weba za tajmer (Zahtjev 8a)
-    if device_code == "TIMERSET":
-        state["timer_value"] = int(payload.get("value", 0))
-        state["timer_running"] = True
-        state["timer_blink"] = False
         return
 
     # Aktuatori (BB, BRGB...)
@@ -55,6 +64,21 @@ def on_message(client, userdata, msg):
             cfg["state"] = payload.get("value", False)
             if "color" in payload:
                 cfg["color"] = payload["color"]
+
+def publish_display(seconds):
+    mins, secs = divmod(seconds, 60)
+    time_str = f"{mins:02d}:{secs:02d}"
+    print(f"[DISPLAY] {time_str}")
+    mqtt_client.publish(
+        "home/PI2/4sd",
+        json.dumps({
+            "measurement": "iot_devices",
+            "device": "4SD",
+            "pi": "PI2",
+            "field": "display_time",
+            "value": time_str
+        })
+    )
 
 def on_event(device_code, settings_cfg, value, topic, simulated):
     global data_batch
@@ -93,21 +117,20 @@ def on_event(device_code, settings_cfg, value, topic, simulated):
 def process_logic(device_code, value, settings_cfg):
     global state, mqtt_client
 
-    # 1. BTN - Štoperica (Ostaje tvoje)
+    # 1. BTN - Štoperica
     if device_code == "BTN" and value:
+        # Ako treperi → zaustavi
         if state["timer_blink"]:
             state["timer_blink"] = False
+            state["timer_running"] = False
             state["timer_value"] = 0
-            on_event("4SD", {"topic": "home/PI2/4sd"}, "    ", "home/PI2/4sd", True)
-        else:
-            state["timer_value"] += state["timer_add_seconds"]
-            state["timer_running"] = True
+            publish_display(0)
+            return
 
-    # 2. TIMERSET - Komanda sa weba (Ostaje tvoje)
-    if device_code == "TIMERSET":
-        state["timer_value"] = int(value)
+        # Inače dodaj sekunde
+        state["timer_value"] += state["timer_add_seconds"]
         state["timer_running"] = True
-        state["timer_blink"] = False
+        publish_display(state["timer_value"])
 
     # 3. DS2 - POPRAVLJENO (Vrata sama gase svoj alarm kad se zatvore)
     if device_code == "DS2":
@@ -130,10 +153,6 @@ def process_logic(device_code, value, settings_cfg):
         magnitude = math.sqrt(sum([x**2 for x in accel]))
         if magnitude > 3.5:
             mqtt_client.publish("home/PI2/gsg_event",json.dumps({"reason": "GSG movement detected", "value": True}))
-            # Ovde može ostati auto-off jer žiroskop nema "zatvoreno" stanje
-            #threading.Timer(5, lambda: mqtt_client.publish(
-            #    "home/PI2/alarm_trigger", json.dumps({"reason": "GSG movement detected", "value": False})
-            #)).start()
 
     # 5. DUS2 / DPIR2 - Brojanje ljudi (Ostaje tvoje)
     if device_code == "DUS2":
@@ -151,18 +170,14 @@ def process_logic(device_code, value, settings_cfg):
         else:
             direction = "exit"
             state["people_count"] = max(0, state["people_count"] - 1)
-            
+
         mqtt_client.publish("home/PI2/person_event", json.dumps({"measurement": "people", "value": state["people_count"], 
-            "device": "SYSTEM", "pi": "PI2", "field": "count","direction":"direction"
+            "device": "SYSTEM", "pi": "PI2", "field": "count","direction":direction
         }))
 
     # 6. DPIR2 - Alarm kad je prazno (Ostaje tvoje)
     if "DPIR2" in device_code and value and state["people_count"] == 0:
         mqtt_client.publish("home/PI2/motion_event",json.dumps({"motion": True, "device": "DPIR2"}))
-        # Ovde može ostati auto-off jer je pokret trenutan
-        #threading.Timer(5, lambda: mqtt_client.publish(
-        #    "home/PI2/alarm_trigger", json.dumps({"reason": f"{device_code} motion while empty", "value": False})
-        #)).start()
 
     # 7. DHT3 (Ostaje tvoje)
     if device_code == "DHT3":
@@ -178,28 +193,36 @@ def process_logic(device_code, value, settings_cfg):
 # timer thread (4SD) 
 def timer_thread():
     global state
+
     while True:
+
         if state["timer_running"] and state["timer_value"] > 0:
             time.sleep(1)
             state["timer_value"] -= 1
 
-            mins, secs = divmod(state["timer_value"], 60)
-            time_str = f"{mins:02d}{secs:02d}"
-
-            # Publish trenutno vrijeme na 4SD
-            on_event("4SD", {"topic": "home/PI2/4sd", "field_name": "display_time"}, time_str, "home/PI2/4sd", True)
+            publish_display(state["timer_value"])
 
             if state["timer_value"] <= 0:
                 state["timer_running"] = False
                 state["timer_blink"] = True
-                print("[TIMER] Isteklo vrijeme! Treperenje aktivirano.")
+                print("[TIMER] Isteklo vreme!")
 
         elif state["timer_blink"]:
-            # Treperi 00:00
-            on_event("4SD", {"topic": "home/PI2/4sd", "field_name": "display_time"}, "0000", "home/PI2/4sd", True)
+            publish_display(0)
             time.sleep(0.5)
-            on_event("4SD", {"topic": "home/PI2/4sd", "field_name": "display_time"}, "    ", "home/PI2/4sd", True)
+
+            mqtt_client.publish(
+                "home/PI2/4sd",
+                json.dumps({
+                    "measurement": "iot_devices",
+                    "device": "4SD",
+                    "pi": "PI2",
+                    "field": "display_time",
+                    "value": "    "
+                })
+            )
             time.sleep(0.5)
+
         else:
             time.sleep(0.2)
 

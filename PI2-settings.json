@@ -49,7 +49,7 @@
     "BTN": {
       "type": "button",
       "simulated": true,
-      "delay": 10,
+      "delay": 5,
       "pin": 20,
       "field_name": "status",
       "topic": "home/PI2/btn",

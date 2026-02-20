@@ -5,7 +5,7 @@ def run_4sd_simulator(actuator_code, stop_event, settings, on_state_change):
 
     while not stop_event.is_set():
 
-        current_val = settings.get("value", time.strftime("%H:%M"))
+        current_val = settings.get("value", "00:00")
 
         if current_val != last_displayed_value:
             print(f"--- DISPLEJ [{actuator_code}] ---")

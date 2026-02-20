@@ -87,10 +87,31 @@
                 <h3>PIR (DPIR2)</h3>
                 <p id="dpir2-val">Mirno</p>
             </div>
+            <div class="card">
+                <h3>Postavi vreme štoperice</h3>
 
+                <label>Unesi sekunde:</label>
+                <input type="number" id="timer-seconds" value="60" min="1">
+
+                <button onclick="setTimer()">Pokreni štopericu</button>
+            </div>
             <div class="card" id="card-4SD">
                 <h3>Kuhinjska Štoperica (4SD)</h3>
                 <p id="display-val">00:00</p>
+            </div>
+
+            <div class="card">
+                <h3>Štoperica - dodavanje sekundi</h3>
+                <label for="add-seconds">Dodaj sekundi:</label>
+                <select id="add-seconds" onchange="updateAddSeconds()">
+                    <option value="0">0</option>
+                    <option value="5">5</option>
+                    <option value="10" selected>10</option>
+                    <option value="15">15</option>
+                    <option value="30">30</option>
+                    <option value="60">60</option>
+                </select>
+                <button onclick="setTimerSeconds()">Dodaj sekundi</button>
             </div>
 
             <div class="card" id="card-BTN">
@@ -166,6 +187,25 @@
             const payload = {pi: pi, device:device, value: value};
             if(color) payload.color = color;
             socket.emit("command", payload);
+        }
+        function setTimerSeconds() {
+            const n = parseInt(document.getElementById('add-seconds').value);
+
+            socket.emit("command", {
+                pi: "PI2",
+                device: "BTN_CONFIG", 
+                value: n
+            });
+        }
+        function setTimer() {
+            const seconds = document.getElementById("timer-seconds").value;
+                socket.emit("command",
+                    {
+                        pi :"PI2",
+                        device: "TIMERSET",
+                        value: seconds
+                    }
+                );
         }
         socket.on('device_update', function(data) {
 
