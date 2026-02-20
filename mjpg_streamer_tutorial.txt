@@ -21,3 +21,7 @@ mjpg_streamer -i "input_uvc.so" -o "output_http.so -p 8080 -w /usr/local/share/m
 
 # Open stream in a browser
 http://<raspberry_pi_ip>:8080/?action=stream
+
+U index html ubaciti ovaj gore link
+
+mjpg_streamer -i "input_uvc.so" -o "output_http.so -p 8080 -w /usr/local/share/mjpg-streamer/www --cors"
