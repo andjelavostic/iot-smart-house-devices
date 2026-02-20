@@ -10,10 +10,60 @@
   },
 
   "sensors": {
-    
+    "DS1": {
+      "name": "DS1",
+      "type": "button",
+      "simulated": true,
+      "delay": 5,
+      "pin": 17,
+      "field_name": "status",
+      "topic": "home/PI1/ds1",
+      "description": "Door Sensor (Button)"
+    },
+    "DPIR1": {
+      "name": "DPIR1",
+      "type": "pir",
+      "simulated": true,
+      "delay": 7,
+      "pin": 18,
+      "field_name": "motion",
+      "topic": "home/PI1/dpir1",
+      "description": "Door Motion Sensor"
+    },
+    "DMS": {
+      "name":"DMS",
+      "type": "membrane",
+      "simulated": true,
+      "delay": 7,
+      "rows": [18, 23, 24, 25],
+      "cols": [4, 17, 27, 22],
+      "field_name": "code",
+      "topic": "home/PI1/dms",
+      "description": "Door Membrane Switch"
+    },
+    "DUS1": {
+      "name": "DUS1",
+      "type": "ultrasonic",
+      "simulated": true,
+      "delay": 5,
+      "trig_pin":23,
+      "echo_pin":24,
+      "field_name": "distance",
+      "topic": "home/PI1/dus1",
+      "description": "Door Ultrasonic Sensor"
+    }
   },
    "actuators": {
-    
+    "DL": {
+      "name": "DL",
+      "type": "led",
+      "simulated": true,
+      "delay": 2,
+      "pin": 18,
+      "field_name": "state",
+      "topic": "home/PI1/dl",
+      "description": "Door Light (LED diode)"
+    },
     "DB": {
         "type": "buzzer",
         "simulated": true,

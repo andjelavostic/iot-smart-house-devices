@@ -6,7 +6,7 @@ from settings import load_settings_spec
 from registry import ACTUATOR_REGISTRY, SENSOR_REGISTRY
 
 # --- SETTINGS ---
-settings = load_settings_spec('PI1-settings-saver.json')
+settings = load_settings_spec('PI1-settings.json')
 mqtt_config = settings.get("mqtt", {})
 mqtt_client = mqtt.Client()
 BATCH_SIZE = mqtt_config.get("batch_size", 5)
@@ -179,7 +179,8 @@ def process_logic(device_code, value):
     # 3. PEOPLE COUNTING (DUS1 + DPIR1)
     if device_code == "DUS1":
         state["last_distances"].append(value)
-        if len(state["last_distances"]) > 5: state["last_distances"].pop(0)
+        if len(state["last_distances"]) > 5:
+            state["last_distances"].pop(0)
 
     if device_code == "DPIR1" and value and len(state["last_distances"]) >= 3:
         first, last = state["last_distances"][0], state["last_distances"][-1]
@@ -230,19 +231,22 @@ def main():
 
     for code, cfg in settings.get("sensors", {}).items():
         entry = SENSOR_REGISTRY.get(cfg["type"])
-        if not entry: continue
+        if not entry:
+            continue
         runner = entry["sim"] if cfg.get("simulated", True) else entry["true"]
         cb_type = "on_value" if cfg["type"] in ["ultrasonic", "membrane"] else "on_state_change"
         threading.Thread(target=runner, kwargs={"sensor_code": code, "delay": cfg.get("delay", 2), "stop_event": stop_event, cb_type: (lambda c, f, v, t=cfg["topic"], sim=cfg.get("simulated", True): on_event(c, f, v, t, sim)), "settings": cfg}, daemon=True).start()
 
     for code, cfg in settings.get("actuators", {}).items():
         entry = ACTUATOR_REGISTRY.get(cfg["type"])
-        if not entry: continue
+        if not entry:
+            continue
         runner = entry["sim"] if cfg.get("simulated", True) else entry["true"]
         threading.Thread(target=runner, kwargs={"actuator_code": code, "stop_event": stop_event, "settings": cfg, "on_state_change": (lambda c, s, v, t=cfg["topic"]: on_event(c, "state", v, t, True))}, daemon=True).start()
 
     try:
-        while True: time.sleep(1)
+        while True:
+            time.sleep(1)
     except KeyboardInterrupt:
         stop_event.set()
 
