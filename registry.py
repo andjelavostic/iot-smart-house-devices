@@ -1,6 +1,6 @@
 from sensors.dht import run_dht_real
 from sensors.ir import run_ir_real
-from sensors.lcd.lcd import run_lcd_real
+from sensors.lcd import run_lcd_real
 from sensors.led import run_led_real
 from sensors.rgb_led import run_rgb_real
 from sensors.ultrasonic import run_ultrasonic_real
