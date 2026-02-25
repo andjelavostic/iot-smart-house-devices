@@ -17,7 +17,7 @@ make
 sudo make install
 
 # Starting a stream
-mjpg_streamer -i "input_uvc.so" -o "output_http.so -p 8080 -w /usr/local/share/mjpg-streamer/www"
+sudo mjpg_streamer -i "input_uvc.so" -o "output_http.so -p 8080 -w /usr/local/share/mjpg-streamer/www"
 
 # Open stream in a browser
 http://<raspberry_pi_ip>:8080/?action=stream

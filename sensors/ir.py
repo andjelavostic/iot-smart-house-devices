@@ -6,7 +6,7 @@ except ImportError:
 import time
 from datetime import datetime
 
-def run_ir_real(sensor_code, on_value, stop_event, settings=None):
+def run_ir_real(sensor_code,delay, on_value, stop_event, settings=None):
     """
     Real IR sensor runner.
     settings mora da sadrži:
