@@ -20,7 +20,8 @@ state = {
     "last_distances": [],
     "correct_pin": "1234",
     "ds1_trigger_time": None,
-    "ds2_trigger_time": None
+    "ds2_trigger_time": None,
+    "pin_buffer": ""
 }
 
 batch_lock = threading.Lock()
@@ -124,16 +125,29 @@ def arm_system():
 def process_logic(device_code, value):
     # 1. PIN LOGIKA (DMS) - On je "Master" i gasi sve
     if device_code == "DMS":
-        if value == state["correct_pin"]:
-            # Ako je alarm aktivan ILI je sistem samo naoružan
-            if state["alarm_active"] or state["system_armed"]:
-                deactivate_alarm("PIN UNET","PI1") # Ovo briše state["alarm_reason"]
-                state["system_armed"] = False
-                print("[SYSTEM] Sve deaktivirano PIN-om.")
-            else:
-                # Ako je sve bilo ugašeno, PIN naoružava sistem
-                print("[SYSTEM] Sistem će biti aktivan za 10s...")
-                threading.Timer(10, arm_system).start()
+        entered_pin = ""
+        if len(str(value)) == 1:
+            state["pin_buffer"] += str(value)
+            print(f"[DMS] Trenutni unos: {state['pin_buffer']}")
+            
+            # tek kada skupimo 4 karaktera, postavljamo entered_pin za provjeru
+            if len(state["pin_buffer"]) == 4:
+                entered_pin = state["pin_buffer"]
+                state["pin_buffer"] = "" # reset bafer za sledeći put
+        else:
+            # ako je simulacija, ona šalje cijelo kod odjednom
+            entered_pin = value
+        if entered_pin:
+            if entered_pin == state["correct_pin"]:
+                # Ako je alarm aktivan ILI je sistem samo naoružan
+                if state["alarm_active"] or state["system_armed"]:
+                    deactivate_alarm("PIN UNET","PI1") # Ovo briše state["alarm_reason"]
+                    state["system_armed"] = False
+                    print("[SYSTEM] Sve deaktivirano PIN-om.")
+                else:
+                    # Ako je sve bilo ugašeno, PIN naoružava sistem
+                    print("[SYSTEM] Sistem će biti aktivan za 10s...")
+                    threading.Timer(10, arm_system).start()
 
     # 2. VRATA (DS1)
     if device_code=="DS1":
