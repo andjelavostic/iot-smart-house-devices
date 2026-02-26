@@ -204,7 +204,7 @@ class LCD(object):
                 self.write4bits(ord(char), True)
 
 
-def run_lcd_real(sensor_code, on_value, stop_event, settings=None):
+def run_lcd_real(actuator_code, stop_event, settings=None, on_state_change=None):
     """
     Runner za pravi LCD na Raspberry Pi.
     settings može da sadrži:
@@ -224,7 +224,7 @@ def run_lcd_real(sensor_code, on_value, stop_event, settings=None):
     if backlight:
         lcd.message(msg)
 
-    print(f"[{sensor_code}] LCD REAL started with message:\n{msg}")
+    print(f"[{actuator_code}] LCD REAL started with message:\n{msg}")
 
     try:
         while not stop_event.is_set():
@@ -232,11 +232,11 @@ def run_lcd_real(sensor_code, on_value, stop_event, settings=None):
             if settings and "message" in settings:
                 lcd.clear()
                 lcd.message(settings["message"])
-            if on_value:
+            if on_state_change:
                 # za LCD on_value možemo obavestiti da je prikazano
-                on_value(sensor_code, settings, settings.get("message") if settings else msg)
+                on_state_change(actuator_code, settings, settings.get("message") if settings else msg)
             time.sleep(1)
 
     finally:
         lcd.clear()
-        print(f"[{sensor_code}] LCD stopped")
+        print(f"[{actuator_code}] LCD stopped")

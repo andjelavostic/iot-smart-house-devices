@@ -32,7 +32,7 @@ def generate_distance_realistic(delay=0.1, min_dist=50, max_dist=200, frequency=
         current_distance += diff + noise
         current_distance = max(min_dist, min(max_dist, current_distance))  # ograniči opseg
 
-        yield int(round(current_distance))
+        yield float(round(current_distance, 2))
         time.sleep(delay)
 def ultrasonic_sim(sensor_code, delay, on_value, stop_event, settings=None):
     """
