@@ -13,6 +13,7 @@ mqtt_client = mqtt.Client()
 # GLOBALNO STANJE ZA PI2
 state = {
     "people_count": 0,
+    "local_people_count":0,
     "last_distances": [],
     "ds2_trigger_time": None,
     "alarm_active": False,
@@ -165,16 +166,25 @@ def process_logic(device_code, value, settings_cfg):
         last = state["last_distances"][-1]
 
         if last < first:
-            direction = "enter"
+            if state["local_people_count"] > 0:
+                state["local_people_count"]-=1
+                direction = "enter"
+            else:
+                direction = "none"
         else:
-            direction = "exit"
+            if state["people_count"] > state["local_people_count"]+1:
+                state["local_people_count"]+=1
+                direction = "exit"
+            else:
+                direction= "none"
+        
 
-        mqtt_client.publish("home/PI2/person_event", json.dumps({"measurement": "people", "value": state["people_count"], 
+        mqtt_client.publish("home/PI2/person_event", json.dumps({"measurement": "people", "value": state["local_people_count"], 
             "device": "SYSTEM", "pi": "PI2", "field": "count","direction":direction
         }))
 
     # 6. DPIR2 - Alarm kad je prazno 
-    if "DPIR2" in device_code and value and state["people_count"] == 0:
+    if "DPIR2" in device_code and value and state["local_people_count"] == 0:
         mqtt_client.publish("home/PI2/motion_event",json.dumps({"motion": True, "device": "DPIR2"}))
 
     # 7. DHT3 

@@ -12,11 +12,11 @@ socketio = SocketIO(app, cors_allowed_origins="*",async_mode="threading")
 # INFLUXDB SETUP
 #Andjela, ne brisi moj token samo zakomentarisi
 #Branka
-token = "Mr_rBWmLoa9EXenHySzkHOW6tN-bi0iJ_b-SD1wxhZSs37pqdnW8hDZW8f3XKYJ-TMHf2gRYDuPhsfZDhBresA=="
+#token = "Mr_rBWmLoa9EXenHySzkHOW6tN-bi0iJ_b-SD1wxhZSs37pqdnW8hDZW8f3XKYJ-TMHf2gRYDuPhsfZDhBresA=="
 #Andjela
 #token="6HCU2B_untoFWt_nrCyPtU863ltIn2EAg-bzScRONbTawqQzYO62tG6QMdxdrSfkTCDiYAoWVMenZB5HR_Yvaw=="
 #Andjela 2
-#token="wXZ_NwOVI4Zkj-rv-fv92t7DqNG-p6EH7hhkHtmT1PFpOhNdEaJItARNVFaAxI7Qn2cAPc4KmBZpZe34dbIvoA=="
+token="wXZ_NwOVI4Zkj-rv-fv92t7DqNG-p6EH7hhkHtmT1PFpOhNdEaJItARNVFaAxI7Qn2cAPc4KmBZpZe34dbIvoA=="
 org = "smart house"
 bucket = "iot_bucket"
 client = InfluxDBClient(url="http://localhost:8086", token=token, org=org)
