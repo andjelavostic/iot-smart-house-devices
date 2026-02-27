@@ -166,10 +166,8 @@ def process_logic(device_code, value, settings_cfg):
 
         if last < first:
             direction = "enter"
-            state["people_count"] += 1
         else:
             direction = "exit"
-            state["people_count"] = max(0, state["people_count"] - 1)
 
         mqtt_client.publish("home/PI2/person_event", json.dumps({"measurement": "people", "value": state["people_count"], 
             "device": "SYSTEM", "pi": "PI2", "field": "count","direction":direction
