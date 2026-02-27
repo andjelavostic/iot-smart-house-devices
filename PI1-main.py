@@ -195,14 +195,12 @@ def process_logic(device_code, value):
         state["last_distances"].append(value)
         if len(state["last_distances"]) > 5:
             state["last_distances"].pop(0)
-
     if device_code == "DPIR1" and value and len(state["last_distances"]) >= 3:
         first, last = state["last_distances"][0], state["last_distances"][-1]
         if last < first:
             state["people_count"] += 1
         else:
             state["people_count"] = max(0, state["people_count"] - 1)
-        
         mqtt_client.publish("home/PI1/people_count", json.dumps({
             "measurement": "people", "value": state["people_count"], "device": "SYSTEM", "pi": "PI1", "field": "count"
         }))

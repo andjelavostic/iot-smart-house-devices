@@ -154,7 +154,7 @@ def process_logic(device_code, value, settings_cfg):
         if magnitude > 3.5:
             mqtt_client.publish("home/PI2/gsg_event",json.dumps({"reason": "GSG movement detected", "value": True}))
 
-    # 5. DUS2 / DPIR2 - Brojanje ljudi (Ostaje tvoje)
+    # 5. DUS2 / DPIR2 - Brojanje ljudi
     if device_code == "DUS2":
         state["last_distances"].append(value)
         if len(state["last_distances"]) > 5:
@@ -173,11 +173,11 @@ def process_logic(device_code, value, settings_cfg):
             "device": "SYSTEM", "pi": "PI2", "field": "count","direction":direction
         }))
 
-    # 6. DPIR2 - Alarm kad je prazno (Ostaje tvoje)
+    # 6. DPIR2 - Alarm kad je prazno 
     if "DPIR2" in device_code and value and state["people_count"] == 0:
         mqtt_client.publish("home/PI2/motion_event",json.dumps({"motion": True, "device": "DPIR2"}))
 
-    # 7. DHT3 (Ostaje tvoje)
+    # 7. DHT3 
     if device_code == "DHT3":
         mqtt_client.publish("home/PI2/dht3", json.dumps({
             "temperature": value.get("temperature"),
